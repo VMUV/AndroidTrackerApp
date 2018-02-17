@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MotusApp</string>
+    <string name="news">News</string>
+    <string name="tracker_app">Tracker App</string>
+</resources>
