@@ -1,14 +1,19 @@
 package com.clokey.shasta.motusapp;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
 {
 
-    //ToDo make a "pairedDevice" class with parameters(String deviceName, boolean isAvailable, boolean isConnected)
+    //Done make a "pairedDevice" class with parameters(String deviceName, boolean isAvailable, boolean isConnected)
     //ToDo make a bluetooth static class that handles all data protocol activities
         //ToDo add a function that polls the paired items list and returns a list of "paired devices" objects
         //ToDo add a function that connects to a to a device on the "paired devices list"
@@ -34,8 +39,6 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_ENABLE_BT = 1;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -54,6 +57,28 @@ public class MainActivity extends AppCompatActivity
             startActivityForResult(enableBtIntent,REQUEST_ENABLE_BT);
         }
 
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();
+
+        if (pairedDevices.size() > 0)
+        {
+            // There are paired devices. Get the name and address of each paired device.
+            for (BluetoothDevice device : pairedDevices)
+            {
+                String deviceName = device.getName();
+                String deviceHardwareAddress = device.getAddress(); // MAC address
+                pairedDevicesContainer.add(new PairedDevice(deviceName,deviceHardwareAddress));
+            }
+        }
+
+        PairedDevicesAdapter adapter = new PairedDevicesAdapter(MainActivity.this, pairedDevicesContainer);
+
+        ListView pairedDeviceList = findViewById(R.id.paired_device_list);
+
+        pairedDeviceList.setAdapter(adapter);
+
         
     }
 }
+
+

@@ -6,14 +6,12 @@ package com.clokey.shasta.motusapp;
 
 public class PairedDevice
 {
-    private String deviceName;
-    private boolean isAvailable, isConnected;
+    private String deviceName, macAddress;
 
-    public PairedDevice(String deviceName, boolean isAvailable, boolean isConnected)
+    public PairedDevice(String deviceName, String macAddress)
     {
         this.deviceName = deviceName;
-        this.isAvailable = isAvailable;
-        this.isConnected = isConnected;
+        this.macAddress = macAddress;
     }
 
     public String getDeviceName()
@@ -21,23 +19,10 @@ public class PairedDevice
         return deviceName;
     }
 
-    public boolean isAvailable()
+    public String getMacAddress()
     {
-        return isAvailable;
+        return macAddress;
     }
 
-    public void setAvailable(boolean available)
-    {
-        isAvailable = available;
-    }
 
-    public boolean isConnected()
-    {
-        return isConnected;
-    }
-
-    public void setConnected(boolean connected)
-    {
-        isConnected = connected;
-    }
 }
