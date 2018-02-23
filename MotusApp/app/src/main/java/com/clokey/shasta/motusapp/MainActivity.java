@@ -61,74 +61,60 @@ public class MainActivity extends AppCompatActivity
             isBluetoothSupported = false;
         }
 
-        if (!mBluetoothAdapter.isEnabled())
-        {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent,REQUEST_ENABLE_BT);
-        }
-        else
-        {
 
-            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-            ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();
-
-            if (pairedDevices.size() > 0)
+        if (isBluetoothSupported)
+        {
+            if (!mBluetoothAdapter.isEnabled())
             {
-                // There are paired devices. Get the name and address of each paired device.
-                for (BluetoothDevice device : pairedDevices)
-                {
-                    String deviceName = device.getName();
-                    String deviceHardwareAddress = device.getAddress(); // MAC address
-                    pairedDevicesContainer.add(new PairedDevice(deviceName, deviceHardwareAddress));
-                }
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
-
-            mPairedDevicesAdapter.addAll(pairedDevicesContainer);
+            else
+            {
+                updatePairedDevicesList();
+            }
         }
         
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         // Check which request we're responding to
         if (requestCode == REQUEST_ENABLE_BT)
         {
             // Make sure the request was successful
             if (resultCode == RESULT_CANCELED)
             {
-                mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                if (mBluetoothAdapter == null)
-                {
-                    isBluetoothSupported = false;
-                }
-
-                if (!mBluetoothAdapter.isEnabled())
-                {
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent,REQUEST_ENABLE_BT);
-                }
-
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
             else if (resultCode == RESULT_OK)
             {
-                mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();
-
-                if (pairedDevices.size() > 0)
-                {
-                    // There are paired devices. Get the name and address of each paired device.
-                    for (BluetoothDevice device : pairedDevices)
-                    {
-                        String deviceName = device.getName();
-                        String deviceHardwareAddress = device.getAddress(); // MAC address
-                        pairedDevicesContainer.add(new PairedDevice(deviceName,deviceHardwareAddress));
-                    }
-                }
-                mPairedDevicesAdapter.addAll(pairedDevicesContainer);
+                updatePairedDevicesList();
             }
         }
     }
+
+    private void updatePairedDevicesList()
+    {
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();
+
+        if (pairedDevices.size() > 0)
+        {
+            // There are paired devices. Get the name and address of each paired device.
+            for (BluetoothDevice device : pairedDevices)
+            {
+                String deviceName = device.getName();
+                String deviceHardwareAddress = device.getAddress(); // MAC address
+                pairedDevicesContainer.add(new PairedDevice(deviceName, deviceHardwareAddress));
+            }
+        }
+
+        mPairedDevicesAdapter.addAll(pairedDevicesContainer);
+    }
+
 }
 
 
