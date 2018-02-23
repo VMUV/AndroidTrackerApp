@@ -34,14 +34,9 @@ public class MainActivity extends AppCompatActivity
         //ToDo if the transmission is unsuccessful, show a "transmission failed" toast notification
         //ToDo if the button is clicked again, tell the static background task management class to terminate the thread
 
-
-    static boolean isBluetoothSupported = true;
-
     private final int REQUEST_ENABLE_BT = 1;
 
     private PairedDevicesAdapter mPairedDevicesAdapter;
-
-    private BluetoothAdapter mBluetoothAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -55,23 +50,21 @@ public class MainActivity extends AppCompatActivity
 
         pairedDeviceList.setAdapter(mPairedDevicesAdapter);
 
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null)
-        {
-            isBluetoothSupported = false;
-        }
+        BluetoothUtils.initializeBT();
 
 
-        if (isBluetoothSupported)
+        if (BluetoothUtils.isIsBluetoothSupported())
         {
-            if (!mBluetoothAdapter.isEnabled())
+            if (!BluetoothUtils.isBTEnabled())
             {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
             else
             {
-                updatePairedDevicesList();
+                ArrayList<PairedDevice> pairedDevices = BluetoothUtils.getPairedDevices();
+                if (pairedDevices != null)
+                    mPairedDevicesAdapter.addAll(pairedDevices);
             }
         }
         
@@ -91,28 +84,11 @@ public class MainActivity extends AppCompatActivity
             }
             else if (resultCode == RESULT_OK)
             {
-                updatePairedDevicesList();
+                ArrayList<PairedDevice> pairedDevices = BluetoothUtils.getPairedDevices();
+                if (pairedDevices != null)
+                    mPairedDevicesAdapter.addAll(pairedDevices);
             }
         }
-    }
-
-    private void updatePairedDevicesList()
-    {
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();
-
-        if (pairedDevices.size() > 0)
-        {
-            // There are paired devices. Get the name and address of each paired device.
-            for (BluetoothDevice device : pairedDevices)
-            {
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-                pairedDevicesContainer.add(new PairedDevice(deviceName, deviceHardwareAddress));
-            }
-        }
-
-        mPairedDevicesAdapter.addAll(pairedDevicesContainer);
     }
 
 }
