@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity
         //ToDo class should have a function to terminate the transmission and end the thread
     //ToDo when the app opens, check bluetooth connectivity and ask the user to verify that the current connected device is the host computer
     //ToDo add a button listener to the motus image icon on the main screen of the app
-        //ToDo when the button is clicked, start a separate thread which is built to send data to the connected bluetooth device
+        //Done when the button is clicked, start a separate thread which is built to send data to the connected bluetooth device
         //ToDo if the connection is successfully transmitting, show a "transmitting data" animation at the center of the motus
         //ToDo if the transmission is unsuccessful, show a "transmission failed" toast notification
         //ToDo if the button is clicked again, tell the static background task management class to terminate the thread
@@ -64,9 +64,7 @@ public class MainActivity extends AppCompatActivity
             }
             else
             {
-                BluetoothUtils.updatePairedDevices();
-                if (BluetoothUtils.getPairedDevices() != null)
-                    mPairedDevicesAdapter.addAll(BluetoothUtils.getPairedDevices());
+                updatePairedDevicesAdapter();
             }
         }
 
@@ -97,11 +95,16 @@ public class MainActivity extends AppCompatActivity
             }
             else if (resultCode == RESULT_OK)
             {
-                BluetoothUtils.updatePairedDevices();
-                if (BluetoothUtils.getPairedDevices() != null)
-                    mPairedDevicesAdapter.addAll(BluetoothUtils.getPairedDevices());
+                updatePairedDevicesAdapter();
             }
         }
+    }
+
+    private void updatePairedDevicesAdapter()
+    {
+        BluetoothUtils.updatePairedDevices();
+        if (BluetoothUtils.getPairedDevices() != null)
+            mPairedDevicesAdapter.addAll(BluetoothUtils.getPairedDevices());
     }
 
 }

@@ -21,14 +21,14 @@ public class ConnectThread extends Thread
     private final BluetoothAdapter mmAdapter;
     private final byte[] SERVER_UUID;
 
-    public ConnectThread(BluetoothDevice device, byte[] myUuid)
+    public ConnectThread(BluetoothDevice device, byte[] serverUuid)
     {
         // Use a temporary object that is later assigned to mmSocket
         // because mmSocket is final.
         BluetoothSocket tmp = null;
         mmDevice = device;
         this.mmAdapter = BluetoothAdapter.getDefaultAdapter();
-        SERVER_UUID = myUuid;
+        SERVER_UUID = serverUuid;
 
         try
         {

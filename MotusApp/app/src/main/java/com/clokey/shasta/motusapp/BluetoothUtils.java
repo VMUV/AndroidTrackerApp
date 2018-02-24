@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class BluetoothUtils
 {
-    private static ArrayList<PairedDevice> pairedDevicesContainer;
+    private static ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();
 
     private static boolean isBluetoothSupported = true;
 
@@ -50,7 +50,7 @@ public class BluetoothUtils
         if (isBTEnabled())
         {
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-            pairedDevicesContainer = new ArrayList<>();
+            pairedDevicesContainer.clear();
 
             if (pairedDevices.size() > 0) {
                 // There are paired devices. Get the name and address of each paired device.
