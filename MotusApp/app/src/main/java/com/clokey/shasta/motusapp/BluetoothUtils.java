@@ -2,6 +2,7 @@ package com.clokey.shasta.motusapp;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -12,11 +13,17 @@ import java.util.Set;
 
 public class BluetoothUtils
 {
+    private static ArrayList<PairedDevice> pairedDevicesContainer;
+
     private static boolean isBluetoothSupported = true;
 
     private static boolean isInitialized = false;
 
     private static BluetoothAdapter mBluetoothAdapter;
+
+    private static ConnectThread connectThread;
+
+    private static final byte[] SERVER_UUID = {6,9,6,9,6,9};
 
     public static boolean initializeBT()
     {
@@ -38,12 +45,12 @@ public class BluetoothUtils
         return isBluetoothSupported;
     }
 
-    public static ArrayList<PairedDevice> getPairedDevices()
+    public static void updatePairedDevices()
     {
         if (isBTEnabled())
         {
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-            ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();
+            pairedDevicesContainer = new ArrayList<>();
 
             if (pairedDevices.size() > 0) {
                 // There are paired devices. Get the name and address of each paired device.
@@ -53,10 +60,12 @@ public class BluetoothUtils
                     pairedDevicesContainer.add(new PairedDevice(deviceName, deviceHardwareAddress));
                 }
             }
-            return pairedDevicesContainer;
         }
-        else
-            return null;
+    }
+
+    public static ArrayList<PairedDevice> getPairedDevices()
+    {
+        return pairedDevicesContainer;
     }
 
     public static boolean isBTEnabled()
@@ -66,6 +75,16 @@ public class BluetoothUtils
         else
             return false;
     }
+
+    public static void startBTConnection(String macAddress)
+    {
+
+        connectThread = new ConnectThread(mBluetoothAdapter.getRemoteDevice(macAddress),SERVER_UUID);
+        connectThread.start();
+        Log.v("startBTConnection", "Thread Started");
+    }
+
+
 
 
 }

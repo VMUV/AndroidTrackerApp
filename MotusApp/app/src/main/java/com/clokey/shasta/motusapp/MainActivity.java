@@ -3,8 +3,12 @@ package com.clokey.shasta.motusapp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -16,11 +20,9 @@ public class MainActivity extends AppCompatActivity
     //Done make a "pairedDevice" class with parameters(String deviceName, boolean isAvailable, boolean isConnected)
     //ToDo make a bluetooth static class that handles all data protocol activities
         //Done add a function that polls the paired items list and returns a list of "paired devices" objects
-        //ToDo add a function that connects to a to a device on the "paired devices list"
+        //Done add a function that connects to a to a device on the "paired devices list"
         //Done add a static arrayList of pairedDevices in the bluetooth utils class that holds all the paired devices
         //ToDo add a function that disconnects from the current bluetooth connected device
-        //ToDo add a static object that stores the bluetooth device that is currently connected
-        //ToDo add a function that sends a message to the currently connected bluetooth device
     //ToDo make a Static class that handles all background work for data transmission
         //ToDo give the class an object of the Thread class(or one of its children)
         //ToDo thread should check if bluetooth device is connected
@@ -62,11 +64,22 @@ public class MainActivity extends AppCompatActivity
             }
             else
             {
-                ArrayList<PairedDevice> pairedDevices = BluetoothUtils.getPairedDevices();
-                if (pairedDevices != null)
-                    mPairedDevicesAdapter.addAll(pairedDevices);
+                BluetoothUtils.updatePairedDevices();
+                if (BluetoothUtils.getPairedDevices() != null)
+                    mPairedDevicesAdapter.addAll(BluetoothUtils.getPairedDevices());
             }
         }
+
+        //make the on click listener to handle what happens when each item in the list is clicked
+        pairedDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+            {
+                PairedDevice deviceToLoad = BluetoothUtils.getPairedDevices().get(i);
+                BluetoothUtils.startBTConnection(deviceToLoad.getMacAddress());
+            }
+        });
         
     }
 
@@ -84,9 +97,9 @@ public class MainActivity extends AppCompatActivity
             }
             else if (resultCode == RESULT_OK)
             {
-                ArrayList<PairedDevice> pairedDevices = BluetoothUtils.getPairedDevices();
-                if (pairedDevices != null)
-                    mPairedDevicesAdapter.addAll(pairedDevices);
+                BluetoothUtils.updatePairedDevices();
+                if (BluetoothUtils.getPairedDevices() != null)
+                    mPairedDevicesAdapter.addAll(BluetoothUtils.getPairedDevices());
             }
         }
     }
