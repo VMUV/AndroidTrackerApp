@@ -23,7 +23,11 @@ public class BluetoothUtils
 
     private static ConnectThread connectThread;
 
+    private static AcceptThread acceptThread;
+
     private static final byte[] SERVER_UUID = {6,9,6,9,6,9};
+
+    private static final String SERVER_NAME = "MOTUS_TRACKER_APP_6969";
 
     public static boolean initializeBT()
     {
@@ -76,13 +80,13 @@ public class BluetoothUtils
             return false;
     }
 
-    public static void startBTConnection(String macAddress)
+    public static void startBTConnection()
     {
-
-        connectThread = new ConnectThread(mBluetoothAdapter.getRemoteDevice(macAddress),SERVER_UUID);
-        connectThread.start();
-        Log.v("startBTConnection", "Thread Started");
+        acceptThread = new AcceptThread(SERVER_NAME, SERVER_UUID);
+        acceptThread.start();
+        Log.v("startBTConnection", "accept thread started");
     }
+
 
 
 

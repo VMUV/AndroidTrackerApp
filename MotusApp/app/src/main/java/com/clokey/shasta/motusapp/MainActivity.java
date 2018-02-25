@@ -7,9 +7,12 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -38,6 +41,8 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_ENABLE_BT = 1;
 
+    private final int REQUEST_MAKE_DISCOVERABLE = 2;
+
     private PairedDevicesAdapter mPairedDevicesAdapter;
 
     @Override
@@ -46,38 +51,22 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mPairedDevicesAdapter = new PairedDevicesAdapter(this, new ArrayList<PairedDevice>());
-
-        ListView pairedDeviceList = findViewById(R.id.paired_device_list);
-
-        pairedDeviceList.setAdapter(mPairedDevicesAdapter);
+        TextView trackerMessage = findViewById(R.id.tracker_message);
+        trackerMessage.setText(R.string.engage_tracking);
+        ImageView motusIcon = findViewById(R.id.motus_platform);
 
         BluetoothUtils.initializeBT();
 
 
         if (BluetoothUtils.isIsBluetoothSupported())
         {
-            if (!BluetoothUtils.isBTEnabled())
-            {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
-            else
-            {
-                updatePairedDevicesAdapter();
-            }
+            Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
         }
-
-        //make the on click listener to handle what happens when each item in the list is clicked
-        pairedDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        else
         {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
-            {
-                PairedDevice deviceToLoad = BluetoothUtils.getPairedDevices().get(i);
-                BluetoothUtils.startBTConnection(deviceToLoad.getMacAddress());
-            }
-        });
+            //Todo display a message on the screen telling the user that BT is not supported on their device
+        }
         
     }
 
@@ -85,17 +74,19 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         // Check which request we're responding to
-        if (requestCode == REQUEST_ENABLE_BT)
+        if (requestCode == REQUEST_MAKE_DISCOVERABLE)
         {
             // Make sure the request was successful
             if (resultCode == RESULT_CANCELED)
             {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
             }
-            else if (resultCode == RESULT_OK)
+            else
             {
-                updatePairedDevicesAdapter();
+                Log.v("onActivityResult", "startBTConnection called");
+                BluetoothUtils.startBTConnection();
+                //Todo display a loading screen of some kind notifying the user that bluetooth is attempting to connect
             }
         }
     }

@@ -16,16 +16,13 @@ import static android.content.ContentValues.TAG;
 
 public class ConnectThread extends Thread
 {
-    private final BluetoothSocket mmSocket;
-    private final BluetoothDevice mmDevice;
-    private final BluetoothAdapter mmAdapter;
+    private BluetoothSocket mmSocket = null;
+    private BluetoothDevice mmDevice;
+    private BluetoothAdapter mmAdapter;
     private final byte[] SERVER_UUID;
 
     public ConnectThread(BluetoothDevice device, byte[] serverUuid)
     {
-        // Use a temporary object that is later assigned to mmSocket
-        // because mmSocket is final.
-        BluetoothSocket tmp = null;
         mmDevice = device;
         this.mmAdapter = BluetoothAdapter.getDefaultAdapter();
         SERVER_UUID = serverUuid;
@@ -34,14 +31,13 @@ public class ConnectThread extends Thread
         {
             // Get a BluetoothSocket to connect with the given BluetoothDevice.
             // MY_UUID is the app's UUID string, also used in the server code.
-            tmp = mmDevice.createRfcommSocketToServiceRecord(UUID.nameUUIDFromBytes(SERVER_UUID));
-            Log.v("ConnectThread constuct", tmp.toString());
+            mmSocket = mmDevice.createRfcommSocketToServiceRecord(UUID.nameUUIDFromBytes(SERVER_UUID));
+            Log.v("ConnectThread constuct", mmSocket.toString());
         }
         catch (IOException e)
         {
             Log.e(TAG, "Socket's create() method failed", e);
         }
-        mmSocket = tmp;
     }
 
     public void run()
@@ -59,6 +55,7 @@ public class ConnectThread extends Thread
         }
         catch (IOException connectException)
         {
+            Log.v("ConnectThread.run", "connection timed out");
             // Unable to connect; close the socket and return.
             try
             {
