@@ -2,6 +2,7 @@ package com.clokey.shasta.motusapp;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ public class BluetoothUtils
     private static ConnectThread connectThread;
 
     private static AcceptThread acceptThread;
+
+    private static MessageManagerThread messageManagerThread;
 
     private static final byte[] SERVER_UUID = {6,9,6,9,6,9};
 
@@ -85,6 +88,27 @@ public class BluetoothUtils
         acceptThread = new AcceptThread(SERVER_NAME, SERVER_UUID);
         acceptThread.start();
         Log.v("startBTConnection", "accept thread started");
+    }
+
+    public static void startBTTransmission(BluetoothSocket btSocket)
+    {
+        if (messageManagerThread == null)
+        {
+            messageManagerThread = new MessageManagerThread(btSocket);
+            messageManagerThread.start();
+        }
+        else
+        {
+            messageManagerThread.cancel();
+            messageManagerThread = new MessageManagerThread(btSocket);
+            messageManagerThread.start();
+        }
+    }
+
+    public static void stopBTTransmission()
+    {
+        if (messageManagerThread != null)
+            messageManagerThread.cancel();
     }
 
 

@@ -43,37 +43,38 @@ public class AcceptThread extends Thread
     {
         BluetoothSocket socket = null;
         // Keep listening until exception occurs or a socket is returned.
-        while (true)
+        try
         {
-            try
+            while (!Thread.currentThread().isInterrupted())
             {
-                Log.v("AcceptThread.run", "looking for clients");
-                socket = mmServerSocket.accept();
-            }
-            catch (IOException e)
-            {
-                Log.e(TAG, "Socket's accept() method failed", e);
-                break;
-            }
-
-            if (socket != null)
-            {
-                // A connection was accepted. Perform work associated with
-                // the connection in a separate thread.
-                //TODO uncomment this and implement message manager static class
-                // MessageManager.manageMyConnectedSocket(mmSocket);
-                Log.v("AcceptThread.run", "client connected");
                 try
                 {
-                    mmServerSocket.close();
+                    Log.v("AcceptThread.run", "looking for clients");
+                    socket = mmServerSocket.accept();
                 }
                 catch (IOException e)
                 {
-                    Log.e(TAG, "Could not close the connect socket", e);
+                    Log.e(TAG, "Socket's accept() method failed", e);
+                    break;
                 }
-                break;
+
+                if (socket != null)
+                {
+                    BluetoothUtils.startBTTransmission(socket);
+                    Log.v("AcceptThread.run", "client connected, messages sending");
+                    try
+                    {
+                        mmServerSocket.close();
+                    }
+                    catch (IOException e)
+                    {
+                        Log.e(TAG, "Could not close the connect socket", e);
+                    }
+                    break;
+                }
             }
         }
+        catch (Exception e) {Log.e(TAG, "Interrupt method failed", e);}
     }
 
     // Closes the connect socket and causes the thread to finish.
@@ -81,11 +82,16 @@ public class AcceptThread extends Thread
     {
         try
         {
+            interrupt();
             mmServerSocket.close();
         }
         catch (IOException e)
         {
             Log.e(TAG, "Could not close the connect socket", e);
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, "Could not interrupt the thread", e);
         }
     }
 }

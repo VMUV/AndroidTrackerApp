@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,6 +46,8 @@ public class MainActivity extends AppCompatActivity
 
     private PairedDevicesAdapter mPairedDevicesAdapter;
 
+    public static Handler mHandler; // handler that gets info from Bluetooth service
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -56,6 +59,8 @@ public class MainActivity extends AppCompatActivity
         ImageView motusIcon = findViewById(R.id.motus_platform);
 
         BluetoothUtils.initializeBT();
+
+        mHandler = new Handler();
 
 
         if (BluetoothUtils.isIsBluetoothSupported())
