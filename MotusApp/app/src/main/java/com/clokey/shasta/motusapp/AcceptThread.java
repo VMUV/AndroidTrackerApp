@@ -31,7 +31,7 @@ public class AcceptThread extends Thread
         {
             // SERVER_UUID is the app's UUID string, also used by the client code.
             mmServerSocket = mmAdapter.listenUsingRfcommWithServiceRecord(SERVER_NAME, UUID.fromString(SERVER_UUID));
-            Log.v("AcceptThread constuct", mmServerSocket.toString());
+            Log.v("AcceptThread construct", mmServerSocket.toString());
         }
         catch (IOException e)
         {
@@ -41,8 +41,8 @@ public class AcceptThread extends Thread
 
     public void run()
     {
-        BluetoothSocket socket = null;
-        // Keep listening until exception occurs or a socket is returned.
+        BluetoothSocket socket;
+
         try
         {
             while (!Thread.currentThread().isInterrupted())
@@ -60,8 +60,8 @@ public class AcceptThread extends Thread
 
                 if (socket != null)
                 {
-                    BluetoothUtils.startBTTransmission(socket);
-                    Log.v("AcceptThread.run", "client connected, messages sending");
+                    //Todo BluetoothUtils.startBTTransmission(socket);
+                    Log.v("AcceptThread.run", "client connected!");
                     try
                     {
                         mmServerSocket.close();
@@ -77,7 +77,6 @@ public class AcceptThread extends Thread
         catch (Exception e) {Log.e(TAG, "Interrupt method failed", e);}
     }
 
-    // Closes the connect socket and causes the thread to finish.
     public void cancel()
     {
         try

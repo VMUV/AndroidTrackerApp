@@ -78,21 +78,30 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        // Check which request we're responding to
-        if (requestCode == REQUEST_MAKE_DISCOVERABLE)
+        switch (requestCode)
         {
-            // Make sure the request was successful
-            if (resultCode == RESULT_CANCELED)
+            case REQUEST_MAKE_DISCOVERABLE:
             {
-                Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
+                if (resultCode == RESULT_CANCELED)
+                {
+                    Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                    startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
+                }
+                else
+                {
+                    Log.v("onActivityResult", "startBTConnection called");
+                    BluetoothUtils.startBTConnection();
+                    //Todo display a loading screen of some kind notifying the user that bluetooth is attempting to connect
+                }
             }
-            else
+            break;
+            case REQUEST_ENABLE_BT:
             {
-                Log.v("onActivityResult", "startBTConnection called");
-                BluetoothUtils.startBTConnection();
-                //Todo display a loading screen of some kind notifying the user that bluetooth is attempting to connect
+                //Todo
             }
+            break;
+            default:
+                break;
         }
     }
 

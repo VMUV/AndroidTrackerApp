@@ -32,19 +32,14 @@ public class BluetoothUtils
 
     private static final String SERVER_NAME = "MOTUS_TRACKER_APP";
 
-    public static boolean initializeBT()
+    public static void initializeBT()
     {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         isInitialized = true;
         if (mBluetoothAdapter == null)
-        {
             isBluetoothSupported = false;
-        }
         else
-        {
             isBluetoothSupported = true;
-        }
-        return isBluetoothSupported;
     }
 
     public static boolean isIsBluetoothSupported()
