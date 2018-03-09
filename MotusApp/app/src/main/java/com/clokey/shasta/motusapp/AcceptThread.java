@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 import static android.content.ContentValues.TAG;
@@ -18,6 +20,7 @@ public class AcceptThread extends Thread
 {
     private BluetoothServerSocket mmServerSocket;
     private BluetoothAdapter mmAdapter;
+    private BluetoothSocket mmSocket;
     private final String SERVER_UUID;
     private final String SERVER_NAME;
 
@@ -41,56 +44,16 @@ public class AcceptThread extends Thread
 
     public void run()
     {
-        BluetoothSocket socket;
-
         try
         {
-            while (!Thread.currentThread().isInterrupted())
-            {
-                try
-                {
-                    Log.v("AcceptThread.run", "looking for clients");
-                    socket = mmServerSocket.accept();
-                }
-                catch (IOException e)
-                {
-                    Log.e(TAG, "Socket's accept() method failed", e);
-                    break;
-                }
-
-                if (socket != null)
-                {
-                    //Todo BluetoothUtils.startBTTransmission(socket);
-                    Log.v("AcceptThread.run", "client connected!");
-                    try
-                    {
-                        mmServerSocket.close();
-                    }
-                    catch (IOException e)
-                    {
-                        Log.e(TAG, "Could not close the connect socket", e);
-                    }
-                    break;
-                }
-            }
-        }
-        catch (Exception e) {Log.e(TAG, "Interrupt method failed", e);}
-    }
-
-    public void cancel()
-    {
-        try
-        {
-            interrupt();
-            mmServerSocket.close();
-        }
-        catch (IOException e)
-        {
-            Log.e(TAG, "Could not close the connect socket", e);
+            Log.v("AcceptThread.run", "looking for clients");
+            mmSocket = mmServerSocket.accept();
+            Log.v("AcceptThread.run", "client found, launching message thread");
+            BluetoothUtils.startBTTransmission(mmSocket);
         }
         catch (Exception e)
         {
-            Log.e(TAG, "Could not interrupt the thread", e);
+            Log.e(TAG, "Interrupt method failed", e);
         }
     }
 }
