@@ -18,10 +18,10 @@ public class AcceptThread extends Thread
 {
     private BluetoothServerSocket mmServerSocket;
     private BluetoothAdapter mmAdapter;
-    private final byte[] SERVER_UUID;
+    private final String SERVER_UUID;
     private final String SERVER_NAME;
 
-    public AcceptThread(String serverName, byte[] serverUuid)
+    public AcceptThread(String serverName, String serverUuid)
     {
         this.mmAdapter = BluetoothAdapter.getDefaultAdapter();
         SERVER_UUID = serverUuid;
@@ -30,7 +30,7 @@ public class AcceptThread extends Thread
         try
         {
             // SERVER_UUID is the app's UUID string, also used by the client code.
-            mmServerSocket = mmAdapter.listenUsingRfcommWithServiceRecord(SERVER_NAME, UUID.nameUUIDFromBytes(SERVER_UUID));
+            mmServerSocket = mmAdapter.listenUsingRfcommWithServiceRecord(SERVER_NAME, UUID.fromString(SERVER_UUID));
             Log.v("AcceptThread constuct", mmServerSocket.toString());
         }
         catch (IOException e)

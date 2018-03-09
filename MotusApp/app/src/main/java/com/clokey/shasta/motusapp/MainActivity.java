@@ -52,11 +52,11 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
 
-        TextView trackerMessage = findViewById(R.id.tracker_message);
-        trackerMessage.setText(R.string.engage_tracking);
-        ImageView motusIcon = findViewById(R.id.motus_platform);
+        //TextView trackerMessage = findViewById(R.id.tracker_message);
+        //trackerMessage.setText(R.string.engage_tracking);
+        //ImageView motusIcon = findViewById(R.id.motus_platform);
 
         BluetoothUtils.initializeBT();
 

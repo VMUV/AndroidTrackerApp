@@ -28,9 +28,9 @@ public class BluetoothUtils
 
     private static MessageManagerThread messageManagerThread;
 
-    private static final byte[] SERVER_UUID = {6,9,6,9,6,9};
+    private static final String SERVER_UUID = "7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B";
 
-    private static final String SERVER_NAME = "MOTUS_TRACKER_APP_6969";
+    private static final String SERVER_NAME = "MOTUS_TRACKER_APP";
 
     public static boolean initializeBT()
     {
