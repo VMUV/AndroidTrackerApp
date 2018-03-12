@@ -53,11 +53,12 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
-        // TODO rework this so the layout is relative
-        //setContentView(R.layout.activity_main);
-        //TextView trackerMessage = findViewById(R.id.tracker_message);
-        //trackerMessage.setText(R.string.engage_tracking);
-        //ImageView motusIcon = findViewById(R.id.motus_platform);
+        // Done rework this so the layout is relative
+        // scaled the x and y axis of the image icon to 80% of the view size(view size is determined by the screen size)
+        setContentView(R.layout.activity_main);
+        TextView trackerMessage = findViewById(R.id.tracker_message);
+        trackerMessage.setText(R.string.engage_tracking);
+        ImageView motusIcon = findViewById(R.id.motus_platform);
 
         BluetoothUtils.initializeBT();
         mHandler = new Handler();

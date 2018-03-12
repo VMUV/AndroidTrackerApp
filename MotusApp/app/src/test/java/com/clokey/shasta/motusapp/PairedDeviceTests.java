@@ -1,3 +1,5 @@
+package com.clokey.shasta.motusapp;
+
 import com.clokey.shasta.motusapp.PairedDevice;
 
 import static org.junit.Assert.*;

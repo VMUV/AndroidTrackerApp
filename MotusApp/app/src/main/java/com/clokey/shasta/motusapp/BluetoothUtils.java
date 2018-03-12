@@ -48,7 +48,8 @@ public class BluetoothUtils
 
             if (pairedDevices.size() > 0) {
                 // There are paired devices. Get the name and address of each paired device.
-                for (BluetoothDevice device : pairedDevices) {
+                for (BluetoothDevice device : pairedDevices)
+                {
                     String deviceName = device.getName();
                     String deviceHardwareAddress = device.getAddress(); // MAC address
                     pairedDevicesContainer.add(new PairedDevice(deviceName, deviceHardwareAddress));
