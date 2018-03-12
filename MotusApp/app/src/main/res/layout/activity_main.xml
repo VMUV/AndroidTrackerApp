@@ -7,13 +7,24 @@
     tools:context="com.clokey.shasta.motusapp.MainActivity"
     android:background="@color/colorPrimaryDark">
 
-    <ImageView
+    <!--<ImageView
         android:id="@+id/logo_home"
         android:src="@drawable/vmuv_logo"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="80dp"
+        android:background="@color/colorPrimary"/>-->
+
+    <TextView
+        android:id="@+id/vmuv_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@color/colorPrimary"/>
+        android:text="@string/tracker_app"
+        android:gravity="center"
+        android:fontFamily="monospace"
+        android:textColor="@color/vmuvBlue"
+        android:textSize="24sp"
+        android:padding="16dp"/>
 
     <ImageView
         android:id="@+id/motus_platform"
@@ -29,11 +40,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="@string/tracker_app"
+        android:text="@string/engage_tracking"
         android:gravity="center"
         android:fontFamily="monospace"
         android:textColor="@color/vmuvBlue"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:padding="16dp"/>
 
     <!--<ListView-->
