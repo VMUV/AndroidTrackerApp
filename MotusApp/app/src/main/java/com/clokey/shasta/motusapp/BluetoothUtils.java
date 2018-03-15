@@ -14,11 +14,11 @@ import java.util.Set;
 
 public class BluetoothUtils
 {
-    private static ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();
+    private static ArrayList<PairedDevice> pairedDevicesContainer = new ArrayList<>();//TODO remove
     private static boolean isBluetoothSupported = true;
     private static boolean isInitialized = false;
     private static BluetoothAdapter mBluetoothAdapter;
-    private static ConnectThread connectThread;
+    private static ConnectThread connectThread;//TODO remove
     private static AcceptThread acceptThread;
     private static MessageManagerThread messageManagerThread;
     private static final String SERVER_UUID = "7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B";

@@ -19,7 +19,7 @@ import static com.clokey.shasta.motusapp.MainActivity.mHandler;
 public class MessageManagerThread extends Thread
 {
     private static final String TAG = "MY_APP_DEBUG_TAG";
-    Timer mmTimer;
+    private Timer mmTimer;
 
     // Defines several constants used when transmitting messages between the service and the UI.
     private interface MessageConstants
