@@ -23,7 +23,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener
+public class MainActivity extends AppCompatActivity
 {
 
     //Done make a "pairedDevice" class with parameters(String deviceName, boolean isAvailable, boolean isConnected)
@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ROTATION_VECTOR;//TODO warren change this value to try out the different onboard sensors
+
     private PairedDevicesAdapter mPairedDevicesAdapter;
 
     public static Handler mHandler; // handler that gets info from Bluetooth service
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager mSensorManager;
     private boolean isSensorManagerInitialized = false;
     private boolean isRotationVectorSensorAvailable = true;
+    private SensorEventListener mSensorListener;
     private Sensor mRotationVectorSensor;
 
 
@@ -76,9 +79,39 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         BluetoothUtils.initializeBT();
         mHandler = new Handler();
 
+        mSensorListener = new SensorEventListener()
+        {
+            @Override
+            public void onAccuracyChanged(Sensor arg0, int arg1)
+            {
+            }
+
+            @Override
+            public void onSensorChanged(SensorEvent event)
+            {
+                float[] tempRotationVectorArray;
+                switch (event.sensor.getType())
+                {
+                    case CHOSEN_SENSOR:
+                    {
+                        tempRotationVectorArray = event.values;
+                        for (int i = 0; i < tempRotationVectorArray.length; i++)
+                            Log.v("onSensorChanged", Integer.toString(i) + " " + Float.toString(tempRotationVectorArray[i]));
+
+                    }
+                    break;
+                    default:
+                    {
+                        //we might want to get other data from the on-board sensors later on
+                    }
+                    break;
+                }
+            }
+        };
+
         if (BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
         {
-            mSensorManager.registerListener(this, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);// new functionality for getting device rot data
+            mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);// new functionality for getting device rot data
             Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
         }
@@ -120,42 +153,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     //new functionality for getting rot data
-    public void onAccuracyChanged(Sensor sensor, int accuracy)
-    {
-        //todo determine what to to if the accuracy changes on the data gathering
-    }
-
-    //new functionality for getting rot data
-    public void onSensorChanged(SensorEvent event)
-    {
-        float[] tempRotationVectorArray;
-        switch (event.sensor.getType())
-        {
-            case Sensor.TYPE_ROTATION_VECTOR:
-            {
-                tempRotationVectorArray = event.values;
-                for (int i = 0; i < 4; i++)
-                    Log.v("onSensorChanged", Integer.toString(i) + Float.toString(tempRotationVectorArray[i]));
-
-            }
-            break;
-            default:
-            {
-                //we might want to get other data from the on board sensors later on
-            }
-            break;
-        }
-    }
-
-    //new functionality for getting rot data
     private void initializeSensorManager()
     {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         isSensorManagerInitialized = true;
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null)
+        if (mSensorManager.getDefaultSensor(CHOSEN_SENSOR) == null)
             isRotationVectorSensorAvailable = false;
         else
-            mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+            mRotationVectorSensor = mSensorManager.getDefaultSensor(CHOSEN_SENSOR);
 
         Log.v("initializeSensorManager", Boolean.toString(isRotationVectorSensorAvailable));
     }
