@@ -72,9 +72,4 @@ public class BluetoothUtils
         if (messageManagerThread != null)
             messageManagerThread.cancel();
     }
-
-
-
-
-
 }

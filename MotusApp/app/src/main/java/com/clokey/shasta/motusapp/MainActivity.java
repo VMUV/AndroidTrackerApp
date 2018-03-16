@@ -47,10 +47,7 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
-    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;//TODO warren change this value to try out the different onboard sensors
-
-    public static Handler mHandler; // handler that gets info from Bluetooth service
-
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;//TODO change this value to try out the different onboard sensors
 
     //new functionality for getting rot data
     private SensorManager mSensorManager;
@@ -77,7 +74,6 @@ public class MainActivity extends AppCompatActivity
 
 
         BluetoothUtils.initializeBT();
-        mHandler = new Handler();
 
         mSensorListener = new SensorEventListener()
         {
@@ -130,7 +126,7 @@ public class MainActivity extends AppCompatActivity
         {
             case REQUEST_MAKE_DISCOVERABLE:
             {
-                if (resultCode == RESULT_CANCELED)
+                if (resultCode == RESULT_CANCELED || !BluetoothUtils.isBTEnabled())
                 {
                     Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
