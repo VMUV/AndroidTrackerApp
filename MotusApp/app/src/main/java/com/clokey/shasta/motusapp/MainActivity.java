@@ -47,9 +47,7 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
-    private final int CHOSEN_SENSOR = Sensor.TYPE_ROTATION_VECTOR;//TODO warren change this value to try out the different onboard sensors
-
-    private PairedDevicesAdapter mPairedDevicesAdapter;
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;//TODO warren change this value to try out the different onboard sensors
 
     public static Handler mHandler; // handler that gets info from Bluetooth service
 
@@ -74,7 +72,9 @@ public class MainActivity extends AppCompatActivity
         trackerMessage.setText(R.string.engage_tracking);
         ImageView motusIcon = findViewById(R.id.motus_platform);
 
-        initializeSensorManager();//new functionality for rot data
+        //todo uncomment this and figure out why rotation vector sensor won't work
+        //initializeSensorManager();//new functionality for rot data
+
 
         BluetoothUtils.initializeBT();
         mHandler = new Handler();
@@ -111,7 +111,8 @@ public class MainActivity extends AppCompatActivity
 
         if (BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
         {
-            mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);// new functionality for getting device rot data
+            //todo uncomment this and figure out why rotation vector sensor won't work
+            //mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);// new functionality for getting device rot data
             Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
         }
@@ -163,13 +164,6 @@ public class MainActivity extends AppCompatActivity
             mRotationVectorSensor = mSensorManager.getDefaultSensor(CHOSEN_SENSOR);
 
         Log.v("initializeSensorManager", Boolean.toString(isRotationVectorSensorAvailable));
-    }
-
-    private void updatePairedDevicesAdapter()
-    {
-        BluetoothUtils.updatePairedDevices();
-        if (BluetoothUtils.getPairedDevices() != null)
-            mPairedDevicesAdapter.addAll(BluetoothUtils.getPairedDevices());
     }
 
 }
