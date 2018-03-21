@@ -49,7 +49,7 @@ public class AcceptThread extends Thread
             Log.v("AcceptThread.run", "looking for clients");
             mmSocket = mmServerSocket.accept();
             Log.v("AcceptThread.run", "client found, launching message thread");
-            BluetoothUtils.startBTTransmission(mmSocket);
+            BluetoothUtils.startBTStream(mmSocket);
         }
         catch (Exception e)
         {

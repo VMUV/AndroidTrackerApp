@@ -26,14 +26,14 @@
         android:textSize="24sp"
         android:padding="16dp"/>
 
-    <!--<ImageView
+    <ImageView
         android:id="@+id/motus_platform"
-        android:src="@drawable/vmuv_logo"
+        android:src="@drawable/motus_modular_wedge"
         android:scaleX=".8"
         android:scaleY=".8"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_centerInParent="true"/>-->
+        android:layout_centerInParent="true"/>
 
     <TextView
         android:id="@+id/tracker_message"

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -19,42 +20,39 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Set;
 
+import comms.protocol.java.DataPacket;
+import comms.protocol.java.Rotation_Vector_RawDataPacket;
+
+import static android.widget.Toast.makeText;
+
 public class MainActivity extends AppCompatActivity
 {
-
-    //Done make a "pairedDevice" class with parameters(String deviceName, boolean isAvailable, boolean isConnected)
-    //Done make a bluetooth static class that handles all data protocol activities
-        //Done add a function that polls the paired items list and returns a list of "paired devices" objects
-        //Done add a function that connects to a to a device on the "paired devices list"
-        //Done add a static arrayList of pairedDevices in the bluetooth utils class that holds all the paired devices
-    //Done make a Static class that handles all background work for data transmission
-        //Done give the class an object of the Thread class(or one of its children)
-        //Done thread should check if bluetooth device is connected
-            //Done if so, it should start sending data over to the other device on a specified port
-            //Done if not, it should terminate the thread and notify the main thread that the transmission was unsuccessful
-        //Done class should have a function to terminate the transmission and end the thread
     //ToDo add a button listener to the motus image icon on the main screen of the app
         //Done when the button is clicked, start a separate thread which is built to send data to the connected bluetooth device
         //ToDo if the connection is successfully transmitting, show a "transmitting data" animation at the center of the motus
         //ToDo if the transmission is unsuccessful, show a "transmission failed" toast notification
         //ToDo if the button is clicked again, tell the static background task management class to terminate the thread
 
-    private final int REQUEST_ENABLE_BT = 1;
-
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
-    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;//TODO change this value to try out the different onboard sensors
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;
+    private final int ALTERNATE_SENSOR1 = Sensor.TYPE_GAME_ROTATION_VECTOR;
+    private final int ALTERNATE_SENSOR2 = Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR;
+    private final float[] fakeData = {(float) .5, (float) .6, (float) .7, (float) .8};
 
-    //new functionality for getting rot data
     private SensorManager mSensorManager;
     private boolean isSensorManagerInitialized = false;
     private boolean isRotationVectorSensorAvailable = true;
     private SensorEventListener mSensorListener;
     private Sensor mRotationVectorSensor;
+    private Rotation_Vector_RawDataPacket mDataPacket;
+    private float[] sensorRotationVectorArray;
+    private Toast userMessage;
 
 
     @Override
@@ -62,61 +60,73 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
-        // Done rework this so the layout is relative
-        // scaled the x and y axis of the image icon to 80% of the view size(view size is determined by the screen size)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         setContentView(R.layout.activity_main);
         TextView trackerMessage = findViewById(R.id.tracker_message);
         trackerMessage.setText(R.string.engage_tracking);
-        ImageView motusIcon = findViewById(R.id.motus_platform);
 
-        //todo uncomment this and figure out why rotation vector sensor won't work
-        //initializeSensorManager();//new functionality for rot data
-
-
+        initializeSensorManager();
+        mSensorListener = new RotationEventListener();
         BluetoothUtils.initializeBT();
-
-        mSensorListener = new SensorEventListener()
-        {
-            @Override
-            public void onAccuracyChanged(Sensor arg0, int arg1)
-            {
-            }
-
-            @Override
-            public void onSensorChanged(SensorEvent event)
-            {
-                float[] tempRotationVectorArray;
-                switch (event.sensor.getType())
-                {
-                    case CHOSEN_SENSOR:
-                    {
-                        tempRotationVectorArray = event.values;
-                        for (int i = 0; i < tempRotationVectorArray.length; i++)
-                            Log.v("onSensorChanged", Integer.toString(i) + " " + Float.toString(tempRotationVectorArray[i]));
-
-                    }
-                    break;
-                    default:
-                    {
-                        //we might want to get other data from the on-board sensors later on
-                    }
-                    break;
-                }
-            }
-        };
 
         if (BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
         {
-            //todo uncomment this and figure out why rotation vector sensor won't work
-            //mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);// new functionality for getting device rot data
             Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
         }
+        else if (BluetoothUtils.isIsBluetoothSupported() && !isRotationVectorSensorAvailable)
+        {
+            userMessage = Toast.makeText(this, "Device does not have the correct sensors to track rotation", Toast.LENGTH_LONG);
+            userMessage.show();
+        }
+        else if (!BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
+        {
+            userMessage = Toast.makeText(this, "Device does not support bluetooth", Toast.LENGTH_LONG);
+            userMessage.show();
+        }
         else
         {
-            //Todo display a message on the screen telling the user that BT is not supported on their device or their device doesn't contain a rotVecSensor
+            userMessage = Toast.makeText(this, "Device does not support bluetooth and does not have the correct sensors to track rotation", Toast.LENGTH_LONG);
+            userMessage.show();
         }
-        
+    }
+
+    private class RotationEventListener implements SensorEventListener
+    {
+        @Override
+        public void onAccuracyChanged(Sensor arg0, int arg1)
+        {
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event)
+        {
+            switch (event.sensor.getType())
+            {
+                case CHOSEN_SENSOR:
+                {
+                    sensorRotationVectorArray = event.values;
+
+                    for (int i = 0; i < sensorRotationVectorArray.length; i++)
+                        Log.v("onSensorChanged", Integer.toString(i) + " " + Float.toString(sensorRotationVectorArray[i]));
+
+                    mDataPacket = new Rotation_Vector_RawDataPacket();
+                    try
+                    {
+                        mDataPacket.Serialize(fakeData);
+                        RotationalDataStorage.dataQueue.Add(mDataPacket);
+                    }
+                    catch(Exception e)
+                    {
+                        Log.v("onSensorChanged", "dataQueue.Add failed " + e.toString());
+                    }
+                }
+                break;
+                default:
+                    break;
+            }
+        }
     }
 
     @Override
@@ -128,6 +138,8 @@ public class MainActivity extends AppCompatActivity
             {
                 if (resultCode == RESULT_CANCELED || !BluetoothUtils.isBTEnabled())
                 {
+                    Toast toast = Toast.makeText(this, "Bluetooth discoverability is required to transmit rotational data", Toast.LENGTH_LONG);
+                    toast.show();
                     Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
                 }
@@ -135,13 +147,9 @@ public class MainActivity extends AppCompatActivity
                 {
                     Log.v("onActivityResult", "startBTConnection called");
                     BluetoothUtils.startBTConnection();
+                    mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
                     //Todo display a loading screen of some kind notifying the user that bluetooth is attempting to connect
                 }
-            }
-            break;
-            case REQUEST_ENABLE_BT:
-            {
-                //Todo
             }
             break;
             default:
@@ -149,15 +157,17 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //new functionality for getting rot data
     private void initializeSensorManager()
     {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         isSensorManagerInitialized = true;
-        if (mSensorManager.getDefaultSensor(CHOSEN_SENSOR) == null)
+        if (mSensorManager == null)
             isRotationVectorSensorAvailable = false;
         else
-            mRotationVectorSensor = mSensorManager.getDefaultSensor(CHOSEN_SENSOR);
+            if (mSensorManager.getDefaultSensor(CHOSEN_SENSOR) == null)
+                isRotationVectorSensorAvailable = false;
+            else
+                mRotationVectorSensor = mSensorManager.getDefaultSensor(CHOSEN_SENSOR);
 
         Log.v("initializeSensorManager", Boolean.toString(isRotationVectorSensorAvailable));
     }

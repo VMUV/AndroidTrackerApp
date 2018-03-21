@@ -9,24 +9,20 @@ import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import comms.protocol.java.DataPacket;
+import comms.protocol.java.DataQueue;
+
 /**
  * Created by Shasta on 2/26/2018.
  */
 public class MessageManagerThread extends Thread
 {
     private static final String TAG = "MY_APP_DEBUG_TAG";
+
     private Timer mmTimer;
-
-    // Defines several constants used when transmitting messages between the service and the UI.
-    private interface MessageConstants
-    {
-        int MESSAGE_WRITE = 1;
-        int MESSAGE_TOAST = 2;
-    }
-
     private final BluetoothSocket mmSocket;
     private final OutputStream mmOutStream;
-    private byte[] outgoingMessage;
+    private byte[] outgoingMessage = new byte[22];
 
     public MessageManagerThread(BluetoothSocket socket)
     {
@@ -57,33 +53,33 @@ public class MessageManagerThread extends Thread
         }
     }
 
-    // Call this method from the main activity to shut down the connection.
-    public void cancel()
-    {
-        try
-        {
-            mmTimer.cancel();
-            interrupt();
-            mmSocket.close();
-        }
-        catch (IOException e)
-        {
-            Log.e(TAG, "Could not close the connect socket", e);
-        }
-    }
-
     class SendMessage extends TimerTask
     {
         public void run()
         {   try
             {
-                outgoingMessage = new byte[]{1, 2, 3}; //DataStorage.getRotationalData()); //get array of bytes from DataStorage static class and send it over the BT socket
+                RotationalDataStorage.dataQueue.GetStreamable(outgoingMessage);
                 mmOutStream.write(outgoingMessage);
             }
             catch (IOException e)
             {
                 Log.e(TAG, "Error occurred when sending data", e);
             }
+        }
+    }
+
+    // Call this method from the main activity to shut down the connection.
+    public void cancel()
+    {
+        try
+        {
+            mmTimer.cancel();
+            mmSocket.close();
+            interrupt();
+        }
+        catch (IOException e)
+        {
+            Log.e(TAG, "Could not close the connect socket", e);
         }
     }
 }
