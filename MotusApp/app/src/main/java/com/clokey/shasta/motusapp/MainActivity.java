@@ -2,7 +2,12 @@ package com.clokey.shasta.motusapp;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -22,18 +27,16 @@ public class MainActivity extends AppCompatActivity
 {
 
     //Done make a "pairedDevice" class with parameters(String deviceName, boolean isAvailable, boolean isConnected)
-    //ToDo make a bluetooth static class that handles all data protocol activities
+    //Done make a bluetooth static class that handles all data protocol activities
         //Done add a function that polls the paired items list and returns a list of "paired devices" objects
         //Done add a function that connects to a to a device on the "paired devices list"
         //Done add a static arrayList of pairedDevices in the bluetooth utils class that holds all the paired devices
-        //ToDo add a function that disconnects from the current bluetooth connected device
-    //ToDo make a Static class that handles all background work for data transmission
-        //ToDo give the class an object of the Thread class(or one of its children)
-        //ToDo thread should check if bluetooth device is connected
-            //ToDo if so, it should start sending data over to the other device on a specified port
-            //ToDo if not, it should terminate the thread and notify the main thread that the transmission was unsuccessful
-        //ToDo class should have a function to terminate the transmission and end the thread
-    //ToDo when the app opens, check bluetooth connectivity and ask the user to verify that the current connected device is the host computer
+    //Done make a Static class that handles all background work for data transmission
+        //Done give the class an object of the Thread class(or one of its children)
+        //Done thread should check if bluetooth device is connected
+            //Done if so, it should start sending data over to the other device on a specified port
+            //Done if not, it should terminate the thread and notify the main thread that the transmission was unsuccessful
+        //Done class should have a function to terminate the transmission and end the thread
     //ToDo add a button listener to the motus image icon on the main screen of the app
         //Done when the button is clicked, start a separate thread which is built to send data to the connected bluetooth device
         //ToDo if the connection is successfully transmitting, show a "transmitting data" animation at the center of the motus
@@ -44,9 +47,15 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
-    private PairedDevicesAdapter mPairedDevicesAdapter;
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;//TODO change this value to try out the different onboard sensors
 
-    public static Handler mHandler; // handler that gets info from Bluetooth service
+    //new functionality for getting rot data
+    private SensorManager mSensorManager;
+    private boolean isSensorManagerInitialized = false;
+    private boolean isRotationVectorSensorAvailable = true;
+    private SensorEventListener mSensorListener;
+    private Sensor mRotationVectorSensor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -60,17 +69,52 @@ public class MainActivity extends AppCompatActivity
         trackerMessage.setText(R.string.engage_tracking);
         ImageView motusIcon = findViewById(R.id.motus_platform);
 
-        BluetoothUtils.initializeBT();
-        mHandler = new Handler();
+        //todo uncomment this and figure out why rotation vector sensor won't work
+        //initializeSensorManager();//new functionality for rot data
 
-        if (BluetoothUtils.isIsBluetoothSupported())
+
+        BluetoothUtils.initializeBT();
+
+        mSensorListener = new SensorEventListener()
         {
+            @Override
+            public void onAccuracyChanged(Sensor arg0, int arg1)
+            {
+            }
+
+            @Override
+            public void onSensorChanged(SensorEvent event)
+            {
+                float[] tempRotationVectorArray;
+                switch (event.sensor.getType())
+                {
+                    case CHOSEN_SENSOR:
+                    {
+                        tempRotationVectorArray = event.values;
+                        for (int i = 0; i < tempRotationVectorArray.length; i++)
+                            Log.v("onSensorChanged", Integer.toString(i) + " " + Float.toString(tempRotationVectorArray[i]));
+
+                    }
+                    break;
+                    default:
+                    {
+                        //we might want to get other data from the on-board sensors later on
+                    }
+                    break;
+                }
+            }
+        };
+
+        if (BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
+        {
+            //todo uncomment this and figure out why rotation vector sensor won't work
+            //mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);// new functionality for getting device rot data
             Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
         }
         else
         {
-            //Todo display a message on the screen telling the user that BT is not supported on their device
+            //Todo display a message on the screen telling the user that BT is not supported on their device or their device doesn't contain a rotVecSensor
         }
         
     }
@@ -82,7 +126,7 @@ public class MainActivity extends AppCompatActivity
         {
             case REQUEST_MAKE_DISCOVERABLE:
             {
-                if (resultCode == RESULT_CANCELED)
+                if (resultCode == RESULT_CANCELED || !BluetoothUtils.isBTEnabled())
                 {
                     Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
@@ -105,11 +149,17 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void updatePairedDevicesAdapter()
+    //new functionality for getting rot data
+    private void initializeSensorManager()
     {
-        BluetoothUtils.updatePairedDevices();
-        if (BluetoothUtils.getPairedDevices() != null)
-            mPairedDevicesAdapter.addAll(BluetoothUtils.getPairedDevices());
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        isSensorManagerInitialized = true;
+        if (mSensorManager.getDefaultSensor(CHOSEN_SENSOR) == null)
+            isRotationVectorSensorAvailable = false;
+        else
+            mRotationVectorSensor = mSensorManager.getDefaultSensor(CHOSEN_SENSOR);
+
+        Log.v("initializeSensorManager", Boolean.toString(isRotationVectorSensorAvailable));
     }
 
 }

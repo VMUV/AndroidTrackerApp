@@ -1,8 +1,6 @@
 package com.clokey.shasta.motusapp;
 
 import android.bluetooth.BluetoothSocket;
-import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
 
 
@@ -11,15 +9,13 @@ import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.clokey.shasta.motusapp.MainActivity.mHandler;
-
 /**
  * Created by Shasta on 2/26/2018.
  */
 public class MessageManagerThread extends Thread
 {
     private static final String TAG = "MY_APP_DEBUG_TAG";
-    Timer mmTimer;
+    private Timer mmTimer;
 
     // Defines several constants used when transmitting messages between the service and the UI.
     private interface MessageConstants
@@ -83,21 +79,10 @@ public class MessageManagerThread extends Thread
             {
                 outgoingMessage = new byte[]{1, 2, 3}; //DataStorage.getRotationalData()); //get array of bytes from DataStorage static class and send it over the BT socket
                 mmOutStream.write(outgoingMessage);
-
-                // Share the sent message with the UI activity.
-                Message writtenMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_WRITE, -1, -1, outgoingMessage);
-                writtenMsg.sendToTarget();
             }
             catch (IOException e)
             {
                 Log.e(TAG, "Error occurred when sending data", e);
-
-                // Send a failure message back to the activity.
-                Message writeErrorMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_TOAST);
-                Bundle bundle = new Bundle();
-                bundle.putString("toast", "Couldn't send data to the other device");
-                writeErrorMsg.setData(bundle);
-                mHandler.sendMessage(writeErrorMsg);
             }
         }
     }
