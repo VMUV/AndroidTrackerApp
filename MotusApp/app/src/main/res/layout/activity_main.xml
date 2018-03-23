@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.clokey.shasta.motusapp.MainActivity"
     android:background="@color/colorPrimaryDark">
-
-    <!--<ImageView
-        android:id="@+id/logo_home"
-        android:src="@drawable/vmuv_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:background="@color/colorPrimary"/>-->
 
     <TextView
         android:id="@+id/vmuv_header"
@@ -26,14 +17,14 @@
         android:textSize="24sp"
         android:padding="16dp"/>
 
-    <!--<ImageView
-        android:id="@+id/motus_platform"
-        android:src="@drawable/vmuv_logo"
-        android:scaleX=".8"
-        android:scaleY=".8"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_centerInParent="true"/>-->
+    <!--<ImageView-->
+        <!--android:id="@+id/motus_platform"-->
+        <!--android:src="@drawable/motus_modular_wedge"-->
+        <!--android:scaleX=".8"-->
+        <!--android:scaleY=".8"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_centerInParent="true"/>-->
 
     <TextView
         android:id="@+id/tracker_message"
@@ -46,13 +37,5 @@
         android:textColor="@color/vmuvBlue"
         android:textSize="14sp"
         android:padding="16dp"/>
-
-    <!--<ListView-->
-        <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-        <!--android:id="@+id/paired_device_list"-->
-        <!--android:orientation="vertical"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_below="@id/logo_home"/>-->
 
 </RelativeLayout>

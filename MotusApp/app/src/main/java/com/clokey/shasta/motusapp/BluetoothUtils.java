@@ -8,6 +8,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Set;
 
+import comms.protocol.java.DataPacket;
+
 /**
  * Created by Shasta on 2/23/2018.
  */
@@ -52,7 +54,7 @@ public class BluetoothUtils
         Log.v("startBTConnection", "accept thread started");
     }
 
-    public static void startBTTransmission(BluetoothSocket btSocket)
+    public static void startBTStream(BluetoothSocket btSocket)
     {
         if (messageManagerThread == null)
         {
