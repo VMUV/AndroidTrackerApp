@@ -24,6 +24,8 @@ public class BluetoothUtils
     private static final String SERVER_UUID = "7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B";
     private static final String SERVER_NAME = "MOTUS_TRACKER_APP";
 
+    private static BluetoothStateMachine mBluetoothStateMachine;
+
     public static void initializeBT()
     {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -31,7 +33,10 @@ public class BluetoothUtils
         if (mBluetoothAdapter == null)
             isBluetoothSupported = false;
         else
+        {
             isBluetoothSupported = true;
+            mBluetoothStateMachine = new BluetoothStateMachine(SERVER_NAME, SERVER_UUID);
+        }
     }
 
     public static boolean isIsBluetoothSupported()
@@ -73,5 +78,20 @@ public class BluetoothUtils
     {
         if (messageManagerThread != null)
             messageManagerThread.cancel();
+    }
+
+    public static void runBTSM()
+    {
+        mBluetoothStateMachine.start();
+    }
+
+    public static void changeBTSMState(BluetoothStates nextState)
+    {
+        mBluetoothStateMachine.changeState(nextState);
+    }
+
+    public static void stopBTSM()
+    {
+        mBluetoothStateMachine.cancel();
     }
 }
