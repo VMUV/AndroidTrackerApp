@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
-    private final int CHOSEN_SENSOR = Sensor.TYPE_ROTATION_VECTOR;
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;
     private final int ALTERNATE_SENSOR1 = Sensor.TYPE_GAME_ROTATION_VECTOR;
     private final int ALTERNATE_SENSOR2 = Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR;
     private final float[] fakeData = {(float) .5, (float) .6, (float) .7, (float) .8};
@@ -53,6 +54,8 @@ public class MainActivity extends AppCompatActivity
     private Rotation_Vector_RawDataPacket mDataPacket;
     private float[] sensorRotationVectorArray;
     private Toast userMessage;
+    private TextView mTrackerMessage;
+    private Button mToggleStreamStandby;
 
 
     @Override
@@ -63,8 +66,10 @@ public class MainActivity extends AppCompatActivity
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         setContentView(R.layout.activity_main);
-        TextView trackerMessage = findViewById(R.id.tracker_message);
-        trackerMessage.setText(R.string.engage_tracking);
+        mTrackerMessage = findViewById(R.id.tracker_message);
+        mTrackerMessage.setText(R.string.engage_tracking);
+        mToggleStreamStandby = findViewById(R.id.stream_standby_toggle);
+        mToggleStreamStandby.setText(R.string.toggle_stream_standby);
 
         initializeSensorManager();
         mSensorListener = new RotationEventListener();
@@ -107,14 +112,10 @@ public class MainActivity extends AppCompatActivity
                 case CHOSEN_SENSOR:
                 {
                     sensorRotationVectorArray = event.values;
-
-                    for (int i = 0; i < sensorRotationVectorArray.length; i++)
-                        Log.v("onSensorChanged", Integer.toString(i) + " " + Float.toString(sensorRotationVectorArray[i]));
-
                     mDataPacket = new Rotation_Vector_RawDataPacket();
                     try
                     {
-                        mDataPacket.Serialize(sensorRotationVectorArray);
+                        mDataPacket.Serialize(fakeData);
                         RotationalDataStorage.dataQueue.Add(mDataPacket);
                     }
                     catch(Exception e)
@@ -126,6 +127,18 @@ public class MainActivity extends AppCompatActivity
                 default:
                     break;
             }
+        }
+    }
+
+    private class ToggleBTXMStateButtonListener implements Button.OnClickListener
+    {
+        @Override
+        public void onClick(View view)
+        {
+            if (BluetoothUtils.getBTSMState() == BluetoothStates.streamData)
+                BluetoothUtils.changeBTSMState(BluetoothStates.connectedStandby);
+            else if (BluetoothUtils.getBTSMState() == BluetoothStates.connectedStandby)
+                BluetoothUtils.changeBTSMState(BluetoothStates.streamData);
         }
     }
 
@@ -146,8 +159,10 @@ public class MainActivity extends AppCompatActivity
                 else
                 {
                     Log.v("onActivityResult", "startBTConnection called");
-                    BluetoothUtils.startBTConnection();
+                    //BluetoothUtils.startBTConnection();
+                    BluetoothUtils.runBTSM();
                     mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    mToggleStreamStandby.setOnClickListener(new ToggleBTXMStateButtonListener());
                     //Todo display a loading screen of some kind notifying the user that bluetooth is attempting to connect
                 }
             }
@@ -171,7 +186,6 @@ public class MainActivity extends AppCompatActivity
 
         Log.v("initializeSensorManager", Boolean.toString(isRotationVectorSensorAvailable));
     }
-
 }
 
 

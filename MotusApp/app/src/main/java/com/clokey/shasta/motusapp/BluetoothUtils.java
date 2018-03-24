@@ -19,10 +19,10 @@ public class BluetoothUtils
     private static boolean isBluetoothSupported = true;
     private static boolean isInitialized = false;
     private static BluetoothAdapter mBluetoothAdapter;
-    private static AcceptThread acceptThread;
-    private static MessageManagerThread messageManagerThread;
     private static final String SERVER_UUID = "7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B";
     private static final String SERVER_NAME = "MOTUS_TRACKER_APP";
+
+    private static BluetoothStateMachine mBluetoothStateMachine;
 
     public static void initializeBT()
     {
@@ -31,7 +31,10 @@ public class BluetoothUtils
         if (mBluetoothAdapter == null)
             isBluetoothSupported = false;
         else
+        {
             isBluetoothSupported = true;
+            mBluetoothStateMachine = new BluetoothStateMachine(SERVER_NAME, SERVER_UUID);
+        }
     }
 
     public static boolean isIsBluetoothSupported()
@@ -47,31 +50,28 @@ public class BluetoothUtils
             return false;
     }
 
-    public static void startBTConnection()
+    public static void runBTSM()
     {
-        acceptThread = new AcceptThread(SERVER_NAME, SERVER_UUID);
-        acceptThread.start();
-        Log.v("startBTConnection", "accept thread started");
+        mBluetoothStateMachine.start();
     }
 
-    public static void startBTStream(BluetoothSocket btSocket)
+    public static void changeBTSMState(BluetoothStates nextState)
     {
-        if (messageManagerThread == null)
-        {
-            messageManagerThread = new MessageManagerThread(btSocket);
-            messageManagerThread.start();
-        }
-        else
-        {
-            messageManagerThread.cancel();
-            messageManagerThread = new MessageManagerThread(btSocket);
-            messageManagerThread.start();
-        }
+        mBluetoothStateMachine.changeState(nextState);
     }
 
-    public static void stopBTTransmission()
+    public static void stopBTSM()
     {
-        if (messageManagerThread != null)
-            messageManagerThread.cancel();
+        mBluetoothStateMachine.cancel();
+    }
+
+    public static BluetoothStates getBTSMState()
+    {
+        return mBluetoothStateMachine.getCurrentState();
+    }
+
+    public static void setBTSMOverrideStandby(boolean overrideStandby)
+    {
+        mBluetoothStateMachine.setOverrideToStandby(overrideStandby);
     }
 }
