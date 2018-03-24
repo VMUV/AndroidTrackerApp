@@ -26,6 +26,15 @@
         <!--android:layout_width="wrap_content"-->
         <!--android:layout_centerInParent="true"/>-->
 
+    <Button
+        android:id="@+id/stream_standby_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/vmuvBlue"
+        android:fontFamily="monospace"/>
+
     <TextView
         android:id="@+id/tracker_message"
         android:layout_width="match_parent"

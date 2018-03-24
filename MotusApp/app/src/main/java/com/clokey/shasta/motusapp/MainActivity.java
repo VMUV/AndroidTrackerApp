@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -53,6 +54,8 @@ public class MainActivity extends AppCompatActivity
     private Rotation_Vector_RawDataPacket mDataPacket;
     private float[] sensorRotationVectorArray;
     private Toast userMessage;
+    private TextView mTrackerMessage;
+    private Button mToggleStreamStandby;
 
 
     @Override
@@ -63,8 +66,10 @@ public class MainActivity extends AppCompatActivity
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         setContentView(R.layout.activity_main);
-        TextView trackerMessage = findViewById(R.id.tracker_message);
-        trackerMessage.setText(R.string.engage_tracking);
+        mTrackerMessage = findViewById(R.id.tracker_message);
+        mTrackerMessage.setText(R.string.engage_tracking);
+        mToggleStreamStandby = findViewById(R.id.stream_standby_toggle);
+        mToggleStreamStandby.setText(R.string.toggle_stream_standby);
 
         initializeSensorManager();
         mSensorListener = new RotationEventListener();
@@ -107,10 +112,6 @@ public class MainActivity extends AppCompatActivity
                 case CHOSEN_SENSOR:
                 {
                     sensorRotationVectorArray = event.values;
-
-                    for (int i = 0; i < sensorRotationVectorArray.length; i++)
-                        Log.v("onSensorChanged", Integer.toString(i) + " " + Float.toString(sensorRotationVectorArray[i]));
-
                     mDataPacket = new Rotation_Vector_RawDataPacket();
                     try
                     {
@@ -126,6 +127,18 @@ public class MainActivity extends AppCompatActivity
                 default:
                     break;
             }
+        }
+    }
+
+    private class ToggleBTXMStateButtonListener implements Button.OnClickListener
+    {
+        @Override
+        public void onClick(View view)
+        {
+            if (BluetoothUtils.getBTSMState() == BluetoothStates.streamData)
+                BluetoothUtils.changeBTSMState(BluetoothStates.connectedStandby);
+            else if (BluetoothUtils.getBTSMState() == BluetoothStates.connectedStandby)
+                BluetoothUtils.changeBTSMState(BluetoothStates.streamData);
         }
     }
 
@@ -149,6 +162,7 @@ public class MainActivity extends AppCompatActivity
                     //BluetoothUtils.startBTConnection();
                     BluetoothUtils.runBTSM();
                     mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    mToggleStreamStandby.setOnClickListener(new ToggleBTXMStateButtonListener());
                     //Todo display a loading screen of some kind notifying the user that bluetooth is attempting to connect
                 }
             }
@@ -171,13 +185,6 @@ public class MainActivity extends AppCompatActivity
                 mRotationVectorSensor = mSensorManager.getDefaultSensor(CHOSEN_SENSOR);
 
         Log.v("initializeSensorManager", Boolean.toString(isRotationVectorSensorAvailable));
-    }
-
-    @Override
-    protected void onStop()
-    {
-        BluetoothUtils.stopBTSM();
-        super.onStop();
     }
 }
 

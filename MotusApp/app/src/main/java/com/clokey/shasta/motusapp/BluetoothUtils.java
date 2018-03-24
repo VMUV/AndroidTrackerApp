@@ -19,8 +19,6 @@ public class BluetoothUtils
     private static boolean isBluetoothSupported = true;
     private static boolean isInitialized = false;
     private static BluetoothAdapter mBluetoothAdapter;
-    private static AcceptThread acceptThread;
-    private static MessageManagerThread messageManagerThread;
     private static final String SERVER_UUID = "7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B";
     private static final String SERVER_NAME = "MOTUS_TRACKER_APP";
 
@@ -52,34 +50,6 @@ public class BluetoothUtils
             return false;
     }
 
-    public static void startBTConnection()
-    {
-        acceptThread = new AcceptThread(SERVER_NAME, SERVER_UUID);
-        acceptThread.start();
-        Log.v("startBTConnection", "accept thread started");
-    }
-
-    public static void startBTStream(BluetoothSocket btSocket)
-    {
-        if (messageManagerThread == null)
-        {
-            messageManagerThread = new MessageManagerThread(btSocket);
-            messageManagerThread.start();
-        }
-        else
-        {
-            messageManagerThread.cancel();
-            messageManagerThread = new MessageManagerThread(btSocket);
-            messageManagerThread.start();
-        }
-    }
-
-    public static void stopBTTransmission()
-    {
-        if (messageManagerThread != null)
-            messageManagerThread.cancel();
-    }
-
     public static void runBTSM()
     {
         mBluetoothStateMachine.start();
@@ -93,5 +63,15 @@ public class BluetoothUtils
     public static void stopBTSM()
     {
         mBluetoothStateMachine.cancel();
+    }
+
+    public static BluetoothStates getBTSMState()
+    {
+        return mBluetoothStateMachine.getCurrentState();
+    }
+
+    public static void setBTSMOverrideStandby(boolean overrideStandby)
+    {
+        mBluetoothStateMachine.setOverrideToStandby(overrideStandby);
     }
 }

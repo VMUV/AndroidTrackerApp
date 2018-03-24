@@ -3,4 +3,5 @@
     <string name="news">News</string>
     <string name="tracker_app">Tracker App</string>
     <string name="engage_tracking">Engage Tracking</string>
+    <string name="toggle_stream_standby">Toggle</string>
 </resources>

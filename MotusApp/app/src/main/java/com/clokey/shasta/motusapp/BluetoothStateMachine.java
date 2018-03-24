@@ -3,7 +3,6 @@ package com.clokey.shasta.motusapp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.preference.Preference;
 import android.util.Log;
 
 import java.io.IOException;
@@ -21,6 +20,7 @@ import static android.content.ContentValues.TAG;
 public class BluetoothStateMachine extends Thread
 {
     private boolean isStreaming;
+    private boolean overrideToStandby;
     private Timer mTimer;
     private OutputStream mOutputStream;
     private BluetoothStates currentState;
@@ -35,10 +35,10 @@ public class BluetoothStateMachine extends Thread
     public BluetoothStateMachine(String serverName, String serverUuid)
     {
         isStreaming = false;
+        overrideToStandby = false;
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         SERVER_UUID = serverUuid;
         SERVER_NAME = serverName;
-        mTimer = new Timer(true);
         currentState = BluetoothStates.waitForClient;
     }
 
@@ -93,7 +93,10 @@ public class BluetoothStateMachine extends Thread
             if (mBluetoothServerSocket != null)
             {
                 Log.v("BTSM.waitForConnection", "client found, moving to stream data state");
-                currentState = BluetoothStates.streamData;
+                if (overrideToStandby)
+                    currentState = BluetoothStates.connectedStandby;
+                else
+                    currentState = BluetoothStates.streamData;
                 mBluetoothServerSocket.close();
             }
         }
@@ -107,9 +110,12 @@ public class BluetoothStateMachine extends Thread
     {
         if (!isStreaming)
         {
+            overrideToStandby = false;
+            isStreaming = true;
             try
             {
                 mOutputStream = mBluetoothSocket.getOutputStream();
+                Log.v("BTSM.streamRotData", "successfully got output stream");
             }
             catch (IOException e)
             {
@@ -118,18 +124,20 @@ public class BluetoothStateMachine extends Thread
 
             try
             {
+                mTimer = new Timer(true);
                 mTimer.scheduleAtFixedRate(new SendMessage(),0,25);
-                isStreaming = true;
+                Log.v("BTSM.streamRotData", "Started Data Stream. isStreaming");
             }
-            catch (Exception consumed)
+            catch (Exception e)
             {
                 /* Allow thread to exit */
                 //Todo maybe notify the main activity if the thread exits in this way
+                Log.v("BTSM.streamRotData", "Failed to schedule data stream: " + e.toString());
             }
         }
     }
 
-    private void stayConnectedAndStandby() {/*This does nothing but keep the thread in the standby state.*/}
+    private void stayConnectedAndStandby() {overrideToStandby = false;/*This does nothing but keep the thread in the standby state.*/}
 
     class SendMessage extends TimerTask
     {
@@ -166,7 +174,6 @@ public class BluetoothStateMachine extends Thread
                     catch (IOException e) { }
                     currentState = nextState;
                     isStreaming = false;
-
                 }
             }
             break;
@@ -178,6 +185,17 @@ public class BluetoothStateMachine extends Thread
             default:
             break;
         }
+    }
+
+    public BluetoothStates getCurrentState()
+    {
+        return currentState;
+    }
+
+    /**Should only be called when attempting to make `waitForConnection` state fall into `connectedStandby`*/
+    public void setOverrideToStandby(boolean standbyOrStream)
+    {
+        overrideToStandby = standbyOrStream;
     }
 
     public void cancel()
