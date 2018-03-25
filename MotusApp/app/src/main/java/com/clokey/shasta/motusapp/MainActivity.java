@@ -54,10 +54,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        /**Initial UI Configuration*/
         super.onCreate(savedInstanceState);
-
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
         setContentView(R.layout.activity_main);
         mTrackerMessage = findViewById(R.id.tracker_message);
         mTrackerMessage.setText(R.string.engage_tracking);
@@ -65,12 +64,11 @@ public class MainActivity extends AppCompatActivity
         mToggleStreamStandby.setText(R.string.toggle_stream_standby);
         mToggleStreamStandby.setVisibility(View.INVISIBLE);
 
-        mBluetoothMessageHandler = new BluetoothMessageHandler(Looper.getMainLooper());
-
         initializeSensorManager();
         mSensorListener = new RotationEventListener();
-        BluetoothUtils.initializeBT();
 
+        BluetoothUtils.initializeBT();
+        mBluetoothMessageHandler = new BluetoothMessageHandler(Looper.getMainLooper());
         if (BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
         {
             Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
