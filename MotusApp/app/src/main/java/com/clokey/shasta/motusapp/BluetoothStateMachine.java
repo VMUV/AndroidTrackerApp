@@ -3,7 +3,9 @@ package com.clokey.shasta.motusapp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.os.Bundle;
 import android.util.Log;
+import android.os.Message;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -27,6 +29,8 @@ public class BluetoothStateMachine extends Thread
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothServerSocket mBluetoothServerSocket;
     private BluetoothSocket mBluetoothSocket;
+    private Message mStateChangeHandlerMessage;
+    private Bundle mMessageBundle;
     private byte[] outgoingMessage = new byte[22];
     private final String SERVER_UUID;
     private final String SERVER_NAME;
@@ -75,6 +79,9 @@ public class BluetoothStateMachine extends Thread
 
     private void waitForConnection()
     {
+        mStateChangeHandlerMessage = new Message();
+        mStateChangeHandlerMessage.arg1 = getCurrentState().getStateValue();
+        MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
         try
         {
             // SERVER_UUID is the app's UUID string, also used by the client code.
@@ -94,9 +101,19 @@ public class BluetoothStateMachine extends Thread
             {
                 Log.v("BTSM.waitForConnection", "client found, moving to stream data state");
                 if (overrideToStandby)
+                {
                     currentState = BluetoothStates.connectedStandby;
+                    mStateChangeHandlerMessage = new Message();
+                    mStateChangeHandlerMessage.arg1 = BluetoothStates.connectedStandby.getStateValue();
+                    MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
+                }
                 else
+                {
                     currentState = BluetoothStates.streamData;
+                    mStateChangeHandlerMessage = new Message();
+                    mStateChangeHandlerMessage.arg1 = BluetoothStates.streamData.getStateValue();
+                    MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
+                }
                 mBluetoothServerSocket.close();
             }
         }
@@ -137,7 +154,10 @@ public class BluetoothStateMachine extends Thread
         }
     }
 
-    private void stayConnectedAndStandby() {overrideToStandby = false;/*This does nothing but keep the thread in the standby state.*/}
+    private void stayConnectedAndStandby()
+    {
+        overrideToStandby = false;
+    }
 
     class SendMessage extends TimerTask
     {
