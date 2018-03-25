@@ -12,7 +12,7 @@ public enum BluetoothStates
 
     private int stateValue;
 
-    private BluetoothStates(int value)
+    BluetoothStates(int value)
     {
         stateValue = value;
     }
