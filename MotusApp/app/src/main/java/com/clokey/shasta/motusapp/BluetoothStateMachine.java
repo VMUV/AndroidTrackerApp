@@ -91,6 +91,10 @@ public class BluetoothStateMachine extends Thread
         catch (IOException e)
         {
             Log.e(TAG, "Socket's listen() method failed", e);
+            mStateChangeHandlerMessage = new Message();
+            mStateChangeHandlerMessage.arg1 = 101;
+            MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
+            cancel();
         }
 
         try
@@ -119,7 +123,12 @@ public class BluetoothStateMachine extends Thread
         }
         catch (Exception e)
         {
-            Log.e(TAG, "Interrupt method failed", e);
+            Log.e(TAG, "Socket's accept() method failed", e);
+            mStateChangeHandlerMessage = new Message();
+            mStateChangeHandlerMessage.arg1 = 101;
+            MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
+            cancel();
+
         }
     }
 
@@ -137,6 +146,10 @@ public class BluetoothStateMachine extends Thread
             catch (IOException e)
             {
                 Log.e(TAG, "Error occurred when creating output stream", e);
+                mStateChangeHandlerMessage = new Message();
+                mStateChangeHandlerMessage.arg1 = 101;
+                MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
+                cancel();
             }
 
             try
@@ -148,8 +161,12 @@ public class BluetoothStateMachine extends Thread
             catch (Exception e)
             {
                 /* Allow thread to exit */
-                //Todo maybe notify the main activity if the thread exits in this way
                 Log.v("BTSM.streamRotData", "Failed to schedule data stream: " + e.toString());
+                currentState = BluetoothStates.connectedStandby;
+                mStateChangeHandlerMessage = new Message();
+                mStateChangeHandlerMessage.arg1 = BluetoothStates.connectedStandby.getStateValue();
+                MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
+
             }
         }
     }
@@ -171,6 +188,11 @@ public class BluetoothStateMachine extends Thread
             catch (IOException e)
             {
                 Log.e(TAG, "Error occurred when sending data", e);
+                mStateChangeHandlerMessage = new Message();
+                mStateChangeHandlerMessage.arg1 = 101;
+                MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
+                cancel();
+
             }
         }
     }

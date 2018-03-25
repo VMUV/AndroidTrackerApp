@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,15 +24,10 @@ import comms.protocol.java.Rotation_Vector_RawDataPacket;
 
 public class MainActivity extends AppCompatActivity
 {
-    //ToDo add a button listener to the motus image icon on the main screen of the app
-        //Done when the button is clicked, start a separate thread which is built to send data to the connected bluetooth device
-        //ToDo if the connection is successfully transmitting, show a "transmitting data" animation at the center of the motus
-        //ToDo if the transmission is unsuccessful, show a "transmission failed" toast notification
-        //ToDo if the button is clicked again, tell the static background task management class to terminate the thread
 
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
-    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ROTATION_VECTOR;
     private final int ALTERNATE_SENSOR1 = Sensor.TYPE_GAME_ROTATION_VECTOR;
     private final int ALTERNATE_SENSOR2 = Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR;
     private final float[] fakeData = {(float) .5, (float) .6, (float) .7, (float) .8};
@@ -39,7 +35,6 @@ public class MainActivity extends AppCompatActivity
     private SensorManager mSensorManager;
     private boolean isSensorManagerInitialized = false;
     private boolean isRotationVectorSensorAvailable = true;
-    private boolean isStreaming;
     private SensorEventListener mSensorListener;
     private Sensor mRotationVectorSensor;
     private Rotation_Vector_RawDataPacket mDataPacket;
@@ -47,6 +42,7 @@ public class MainActivity extends AppCompatActivity
     private Toast userMessage;
     private TextView mTrackerMessage;
     private Button mToggleStreamStandby;
+    private ProgressBar mBluetoothConnectionProgressBar;
 
     public static Handler mBluetoothMessageHandler;
 
@@ -54,41 +50,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        /**Initial UI Configuration*/
         super.onCreate(savedInstanceState);
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         mTrackerMessage = findViewById(R.id.tracker_message);
-        mTrackerMessage.setText(R.string.engage_tracking);
+        mTrackerMessage.setText(R.string.please_enable_bluetooth);
         mToggleStreamStandby = findViewById(R.id.stream_standby_toggle);
-        mToggleStreamStandby.setText(R.string.toggle_stream_standby);
         mToggleStreamStandby.setVisibility(View.INVISIBLE);
+        mBluetoothConnectionProgressBar = findViewById(R.id.bluetooth_connection_progress_bar);
+        mBluetoothConnectionProgressBar.setVisibility(View.INVISIBLE);
 
         initializeSensorManager();
-        mSensorListener = new RotationEventListener();
-
-        BluetoothUtils.initializeBT();
-        mBluetoothMessageHandler = new BluetoothMessageHandler(Looper.getMainLooper());
-        if (BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
-        {
-            Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
-        }
-        else if (BluetoothUtils.isIsBluetoothSupported() && !isRotationVectorSensorAvailable)
-        {
-            userMessage = Toast.makeText(this, "Device does not have the correct sensors to track rotation", Toast.LENGTH_LONG);
-            userMessage.show();
-        }
-        else if (!BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
-        {
-            userMessage = Toast.makeText(this, "Device does not support bluetooth", Toast.LENGTH_LONG);
-            userMessage.show();
-        }
-        else
-        {
-            userMessage = Toast.makeText(this, "Device does not support bluetooth and does not have the correct sensors to track rotation", Toast.LENGTH_LONG);
-            userMessage.show();
-        }
+        initializeBluetooth();
     }
 
     private class RotationEventListener implements SensorEventListener
@@ -109,7 +83,7 @@ public class MainActivity extends AppCompatActivity
                     mDataPacket = new Rotation_Vector_RawDataPacket();
                     try
                     {
-                        mDataPacket.Serialize(fakeData);
+                        mDataPacket.Serialize(sensorRotationVectorArray);
                         RotationalDataStorage.dataQueue.Add(mDataPacket);
                     }
                     catch(Exception e)
@@ -160,6 +134,7 @@ public class MainActivity extends AppCompatActivity
                 {
                     mTrackerMessage.setText(R.string.initiating_connection);
                     mToggleStreamStandby.setVisibility(View.INVISIBLE);
+                    mBluetoothConnectionProgressBar.setVisibility(View.VISIBLE);
                 }
                 break;
                 case 1:
@@ -167,6 +142,7 @@ public class MainActivity extends AppCompatActivity
                     mTrackerMessage.setText(R.string.tracker_engaged);
                     mToggleStreamStandby.setText(R.string.pause_tracking);
                     mToggleStreamStandby.setVisibility(View.VISIBLE);
+                    mBluetoothConnectionProgressBar.setVisibility(View.INVISIBLE);
                 }
                 break;
                 case 2:
@@ -174,6 +150,17 @@ public class MainActivity extends AppCompatActivity
                     mTrackerMessage.setText(R.string.standing_by);
                     mToggleStreamStandby.setText(R.string.engage_tracking);
                     mToggleStreamStandby.setVisibility(View.VISIBLE);
+                    mBluetoothConnectionProgressBar.setVisibility(View.INVISIBLE);
+                }
+                break;
+                case 101:
+                {
+                    Toast toast = Toast.makeText(MainActivity.this, "Bluetooth connection was lost", Toast.LENGTH_LONG);
+                    toast.show();
+                    mTrackerMessage.setText(R.string.please_enable_bluetooth);
+                    mToggleStreamStandby.setVisibility(View.INVISIBLE);
+                    mBluetoothConnectionProgressBar.setVisibility(View.INVISIBLE);
+                    initializeBluetooth();
                 }
                 break;
                 default:
@@ -207,7 +194,6 @@ public class MainActivity extends AppCompatActivity
                     BluetoothUtils.runBTSM();
                     mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
                     mToggleStreamStandby.setOnClickListener(new ToggleBTXMStateButtonListener());
-                    //Todo display a loading screen of some kind notifying the user that bluetooth is attempting to connect
                 }
             }
             break;
@@ -228,7 +214,34 @@ public class MainActivity extends AppCompatActivity
             else
                 mRotationVectorSensor = mSensorManager.getDefaultSensor(CHOSEN_SENSOR);
 
+        mSensorListener = new RotationEventListener();
         Log.v("initializeSensorManager", Boolean.toString(isRotationVectorSensorAvailable));
+    }
+
+    private void initializeBluetooth()
+    {
+        BluetoothUtils.initializeBT();
+        mBluetoothMessageHandler = new BluetoothMessageHandler(Looper.getMainLooper());
+        if (BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
+        {
+            Intent turnOnBTDiscover = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
+        }
+        else if (BluetoothUtils.isIsBluetoothSupported() && !isRotationVectorSensorAvailable)
+        {
+            userMessage = Toast.makeText(this, "Device does not have the correct sensors to track rotation", Toast.LENGTH_LONG);
+            userMessage.show();
+        }
+        else if (!BluetoothUtils.isIsBluetoothSupported() && isRotationVectorSensorAvailable)
+        {
+            userMessage = Toast.makeText(this, "Device does not support bluetooth", Toast.LENGTH_LONG);
+            userMessage.show();
+        }
+        else
+        {
+            userMessage = Toast.makeText(this, "Device does not support bluetooth and does not have the correct sensors to track rotation", Toast.LENGTH_LONG);
+            userMessage.show();
+        }
     }
 }
 
