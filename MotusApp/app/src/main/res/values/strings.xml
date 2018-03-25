@@ -4,4 +4,8 @@
     <string name="tracker_app">Tracker App</string>
     <string name="engage_tracking">Engage Tracking</string>
     <string name="toggle_stream_standby">Toggle</string>
+    <string name="initiating_connection">Initiating Connection</string>
+    <string name="tracker_engaged">Tracker Engaged</string>
+    <string name="pause_tracking">Pause Tracking</string>
+    <string name="standing_by">Standing By</string>
 </resources>
