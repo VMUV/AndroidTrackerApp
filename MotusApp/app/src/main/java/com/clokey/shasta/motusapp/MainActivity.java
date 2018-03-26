@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.drawable.AnimationDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +29,7 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
-    private final int CHOSEN_SENSOR = Sensor.TYPE_ROTATION_VECTOR;
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;
     private final int ALTERNATE_SENSOR1 = Sensor.TYPE_GAME_ROTATION_VECTOR;
     private final int ALTERNATE_SENSOR2 = Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR;
     private final float[] fakeData = {(float) .5, (float) .6, (float) .7, (float) .8};
@@ -41,8 +43,8 @@ public class MainActivity extends AppCompatActivity
     private float[] sensorRotationVectorArray;
     private Toast userMessage;
     private TextView mTrackerMessage;
-    private Button mToggleStreamStandby;
-    private ProgressBar mBluetoothConnectionProgressBar;
+    private ImageView mMotusImageView;
+    private AnimationDrawable mMotusAnimation;
 
     public static Handler mBluetoothMessageHandler;
 
@@ -56,10 +58,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         mTrackerMessage = findViewById(R.id.tracker_message);
         mTrackerMessage.setText(R.string.please_enable_bluetooth);
-        mToggleStreamStandby = findViewById(R.id.stream_standby_toggle);
-        mToggleStreamStandby.setVisibility(View.INVISIBLE);
-        mBluetoothConnectionProgressBar = findViewById(R.id.bluetooth_connection_progress_bar);
-        mBluetoothConnectionProgressBar.setVisibility(View.INVISIBLE);
+        mMotusImageView = findViewById(R.id.motus_platform);
+        mMotusImageView.setVisibility(View.INVISIBLE);
 
         initializeSensorManager();
         initializeBluetooth();
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity
                     mDataPacket = new Rotation_Vector_RawDataPacket();
                     try
                     {
-                        mDataPacket.Serialize(sensorRotationVectorArray);
+                        mDataPacket.Serialize(fakeData);
                         RotationalDataStorage.dataQueue.Add(mDataPacket);
                     }
                     catch(Exception e)
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class ToggleBTXMStateButtonListener implements Button.OnClickListener
+    private class ToggleBTSMStateEventListener implements View.OnClickListener
     {
         @Override
         public void onClick(View view)
@@ -107,13 +107,23 @@ public class MainActivity extends AppCompatActivity
             {
                 BluetoothUtils.changeBTSMState(BluetoothStates.connectedStandby);
                 mTrackerMessage.setText(R.string.standing_by);
-                mToggleStreamStandby.setText(R.string.engage_tracking);
+
+                if (mMotusAnimation != null)
+                    mMotusAnimation.stop();
+                mMotusImageView.setBackgroundResource(R.drawable.ic_platform_top_0);
+                mMotusImageView.setVisibility(View.VISIBLE);
             }
             else if (BluetoothUtils.getBTSMState() == BluetoothStates.connectedStandby)
             {
                 BluetoothUtils.changeBTSMState(BluetoothStates.streamData);
                 mTrackerMessage.setText(R.string.tracker_engaged);
-                mToggleStreamStandby.setText(R.string.pause_tracking);
+
+                if (mMotusAnimation != null)
+                    mMotusAnimation.stop();
+                mMotusImageView.setBackgroundResource(R.drawable.motus_streaming);
+                mMotusAnimation = (AnimationDrawable) mMotusImageView.getBackground();
+                mMotusAnimation.start();
+                mMotusImageView.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -133,24 +143,35 @@ public class MainActivity extends AppCompatActivity
                 case 0:
                 {
                     mTrackerMessage.setText(R.string.initiating_connection);
-                    mToggleStreamStandby.setVisibility(View.INVISIBLE);
-                    mBluetoothConnectionProgressBar.setVisibility(View.VISIBLE);
+
+                    if (mMotusAnimation != null)
+                        mMotusAnimation.stop();
+                    mMotusImageView.setBackgroundResource(R.drawable.motus_loading);
+                    mMotusAnimation = (AnimationDrawable) mMotusImageView.getBackground();
+                    mMotusAnimation.start();
+                    mMotusImageView.setVisibility(View.VISIBLE);
                 }
                 break;
                 case 1:
                 {
                     mTrackerMessage.setText(R.string.tracker_engaged);
-                    mToggleStreamStandby.setText(R.string.pause_tracking);
-                    mToggleStreamStandby.setVisibility(View.VISIBLE);
-                    mBluetoothConnectionProgressBar.setVisibility(View.INVISIBLE);
+
+                    if (mMotusAnimation != null)
+                        mMotusAnimation.stop();
+                    mMotusImageView.setBackgroundResource(R.drawable.motus_streaming);
+                    mMotusAnimation = (AnimationDrawable) mMotusImageView.getBackground();
+                    mMotusAnimation.start();
+                    mMotusImageView.setVisibility(View.VISIBLE);
                 }
                 break;
                 case 2:
                 {
                     mTrackerMessage.setText(R.string.standing_by);
-                    mToggleStreamStandby.setText(R.string.engage_tracking);
-                    mToggleStreamStandby.setVisibility(View.VISIBLE);
-                    mBluetoothConnectionProgressBar.setVisibility(View.INVISIBLE);
+
+                    if (mMotusAnimation != null)
+                        mMotusAnimation.stop();
+                    mMotusImageView.setBackgroundResource(R.drawable.ic_platform_top_0);
+                    mMotusImageView.setVisibility(View.VISIBLE);
                 }
                 break;
                 case 101:
@@ -158,9 +179,11 @@ public class MainActivity extends AppCompatActivity
                     Toast toast = Toast.makeText(MainActivity.this, "Bluetooth connection was lost", Toast.LENGTH_LONG);
                     toast.show();
                     mTrackerMessage.setText(R.string.please_enable_bluetooth);
-                    mToggleStreamStandby.setVisibility(View.INVISIBLE);
-                    mBluetoothConnectionProgressBar.setVisibility(View.INVISIBLE);
                     initializeBluetooth();
+
+                    if (mMotusAnimation != null)
+                        mMotusAnimation.stop();
+                    mMotusImageView.setVisibility(View.INVISIBLE);
                 }
                 break;
                 default:
@@ -193,7 +216,7 @@ public class MainActivity extends AppCompatActivity
                     //BluetoothUtils.startBTConnection();
                     BluetoothUtils.runBTSM();
                     mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
-                    mToggleStreamStandby.setOnClickListener(new ToggleBTXMStateButtonListener());
+                    mMotusImageView.setOnClickListener(new ToggleBTSMStateEventListener());
                 }
             }
             break;
