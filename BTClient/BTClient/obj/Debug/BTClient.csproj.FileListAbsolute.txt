@@ -1,8 +1,0 @@
-D:\VMUV\VMUV APP\BTClient\BTClient\bin\Debug\BTClient.exe.config
-D:\VMUV\VMUV APP\BTClient\BTClient\bin\Debug\BTClient.exe
-D:\VMUV\VMUV APP\BTClient\BTClient\bin\Debug\BTClient.pdb
-D:\VMUV\VMUV APP\BTClient\BTClient\bin\Debug\InTheHand.Net.Personal.dll
-D:\VMUV\VMUV APP\BTClient\BTClient\bin\Debug\InTheHand.Net.Personal.xml
-D:\VMUV\VMUV APP\BTClient\BTClient\obj\Debug\BTClient.csprojResolveAssemblyReference.cache
-D:\VMUV\VMUV APP\BTClient\BTClient\obj\Debug\BTClient.exe
-D:\VMUV\VMUV APP\BTClient\BTClient\obj\Debug\BTClient.pdb

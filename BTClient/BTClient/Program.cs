@@ -6,17 +6,13 @@ namespace BTClient
     {
         static void Main(string[] args)
         {
-            BTClient client = null;
+            BTWorker btWorker = new BTWorker();
             while (true)
             {
-                Thread.Sleep(2);
-                if (client == null)
-                    client = new BTClient();
-                BTStates state = client.RunBTStateMachine();
-                if (state == BTStates.disconnected)
-                {
-                    client = null;
-                }
+                if (!btWorker.IsRunning)
+                    btWorker.Run();
+
+                Thread.Sleep(1000);
             }
         }
     }
