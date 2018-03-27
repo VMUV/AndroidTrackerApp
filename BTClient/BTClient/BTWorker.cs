@@ -43,7 +43,7 @@ namespace BTClient
                         Console.WriteLine("w: " + quats[0] + "x: " + quats[1] +
                             "y: " + quats[2] + "z: " + quats[3]);
                     }
-                    Thread.Sleep(25);
+                    Thread.Sleep(10);
                 }
             }
 
