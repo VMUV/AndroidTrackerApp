@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BTClient", "BTClient\BTClient.csproj", "{FC054E2C-56C1-406D-86A3-57F2F2C88171}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Comms Protocol CSharp", "..\..\CommsProtocol\Comms Protocol CSharp\Comms Protocol CSharp\Comms Protocol CSharp.csproj", "{00F7359A-0CC6-4B03-A098-522E2EEA97DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{FC054E2C-56C1-406D-86A3-57F2F2C88171}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC054E2C-56C1-406D-86A3-57F2F2C88171}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC054E2C-56C1-406D-86A3-57F2F2C88171}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00F7359A-0CC6-4B03-A098-522E2EEA97DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00F7359A-0CC6-4B03-A098-522E2EEA97DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00F7359A-0CC6-4B03-A098-522E2EEA97DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00F7359A-0CC6-4B03-A098-522E2EEA97DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,6 @@
 ﻿using System.Threading;
+using Comms_Protocol_CSharp;
+using System;
 
 namespace BTClient
 {
@@ -33,7 +35,16 @@ namespace BTClient
                     break;
                 }
                 else
+                {
+                    while (!client.dataQueue.IsEmpty())
+                    {
+                        RotationVectorRawDataPacket packet = new RotationVectorRawDataPacket(client.dataQueue.Get());
+                        float[] quats = packet.DeSerialize();
+                        Console.WriteLine("w: " + quats[0] + "x: " + quats[1] +
+                            "y: " + quats[2] + "z: " + quats[3]);
+                    }
                     Thread.Sleep(25);
+                }
             }
 
             _isRunning = false;

@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using InTheHand.Net;
 using InTheHand.Net.Sockets;
 using InTheHand.Net.Bluetooth;
+using Comms_Protocol_CSharp;
 
 namespace BTClient
 {
@@ -16,6 +17,7 @@ namespace BTClient
         private int _deviceIndex = 0;
         private byte[] _streamData = new byte[2056];
         private int _timeOutInMs = 0;
+        public DataQueue dataQueue = new DataQueue();
 
         private void TimeOutIncrement()
         {
@@ -98,12 +100,15 @@ namespace BTClient
                     if (numBytes > 0)
                     {
                         _timeOutInMs = 0;
-                        Console.Write("{");
-                        for (int i = 0; i < numBytes - 1; i++)
-                            Console.Write(_streamData[i] + ",");
-                        Console.Write(_streamData[numBytes - 1]);
-                        Console.Write("}");
-                        Console.WriteLine();
+                        dataQueue.ParseStreamable(_streamData, numBytes);
+                        Console.WriteLine("Got " + dataQueue.Count + " valid packets");
+                        //Console.Write("{");
+                        //for (int i = 0; i < numBytes - 1; i++)
+                        //    Console.Write(_streamData[i] + ",");
+                        //Console.Write(_streamData[numBytes - 1]);
+                        //Console.Write("}");
+                        //Console.WriteLine();
+
                     }
                     else
                         TimeOutIncrement();
