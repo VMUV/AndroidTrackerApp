@@ -27,6 +27,7 @@ namespace BTClient
             BluetoothRadio radio = BluetoothRadio.PrimaryRadio;
             if (radio == null)
             {
+                // TODO: No radio found we need to report an error in the logs
                 _state = BTStates.start_radio;
                 return;
             }
@@ -50,7 +51,7 @@ namespace BTClient
             catch (Exception e)
             {
                 Console.WriteLine(e.GetType() + ": " + e.Message);
-                _deviceIndex = 0;
+                _state = BTStates.disconnected;
             }
         }
 
@@ -74,11 +75,14 @@ namespace BTClient
             try
             {
                 _streamIn = _client.GetStream();
+                _streamIn.ReadTimeout = 100;
+                _streamIn.Flush();
                 _state = BTStates.read_stream;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.GetType() + ": " + e.Message);
+                _state = BTStates.disconnected;
             }
         }
 
@@ -86,8 +90,6 @@ namespace BTClient
         {
             try
             {
-                _streamIn.ReadTimeout = 100;
-
                 if (_streamIn.DataAvailable)
                 {
                     int numBytes = _streamIn.Read(_streamData, 0, _streamData.Length);
@@ -112,14 +114,12 @@ namespace BTClient
             catch (Exception e)
             {
                 Console.WriteLine(e.GetType() + ": " + e.Message);
-                _state = BTStates.read_stream;
                 TimeOutIncrement();
             }
 
+            // TODO: variable timeout period?
             if (_timeOutInMs > 5000)
-            {
                 _state = BTStates.disconnected;
-            }
         }
 
         public BTStates RunBTStateMachine()
