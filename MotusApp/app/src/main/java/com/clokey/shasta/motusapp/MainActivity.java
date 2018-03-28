@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_MAKE_DISCOVERABLE = 2;
 
-    private final int CHOSEN_SENSOR = Sensor.TYPE_ACCELEROMETER;
+    private final int CHOSEN_SENSOR = Sensor.TYPE_ROTATION_VECTOR;
     private final int ALTERNATE_SENSOR1 = Sensor.TYPE_GAME_ROTATION_VECTOR;
     private final int ALTERNATE_SENSOR2 = Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR;
     private final float[] fakeData = {(float) .5, (float) .6, (float) .7, (float) .8};
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity
                     mDataPacket = new Rotation_Vector_RawDataPacket();
                     try
                     {
-                        mDataPacket.Serialize(fakeData);
+                        mDataPacket.Serialize(sensorRotationVectorArray);
                         RotationalDataStorage.dataQueue.Add(mDataPacket);
                     }
                     catch(Exception e)
@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity
                     Log.v("onActivityResult", "startBTConnection called");
                     //BluetoothUtils.startBTConnection();
                     BluetoothUtils.runBTSM();
-                    mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_GAME);
                     mMotusImageView.setOnClickListener(new ToggleBTSMStateEventListener());
                 }
             }
