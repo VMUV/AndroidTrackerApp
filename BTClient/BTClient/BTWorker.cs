@@ -39,9 +39,9 @@ namespace BTClient
                     while (!client.dataQueue.IsEmpty())
                     {
                         RotationVectorRawDataPacket packet = new RotationVectorRawDataPacket(client.dataQueue.Get());
-                        float[] quats = packet.DeSerialize();
-                        Console.WriteLine("w: " + quats[0] + "x: " + quats[1] +
-                            "y: " + quats[2] + "z: " + quats[3]);
+                        RotationVector_Quat quat = packet.GetQuat();
+                        Console.WriteLine("w:" + quat.w + "\tx:" + quat.x +
+                            "\ty:" + quat.y + "\tz:" + quat.z);
                     }
                     Thread.Sleep(10);
                 }

@@ -102,13 +102,6 @@ namespace BTClient
                         _timeOutInMs = 0;
                         dataQueue.ParseStreamable(_streamData, numBytes);
                         Console.WriteLine("Got " + dataQueue.Count + " valid packets");
-                        //Console.Write("{");
-                        //for (int i = 0; i < numBytes - 1; i++)
-                        //    Console.Write(_streamData[i] + ",");
-                        //Console.Write(_streamData[numBytes - 1]);
-                        //Console.Write("}");
-                        //Console.WriteLine();
-
                     }
                     else
                         TimeOutIncrement();
