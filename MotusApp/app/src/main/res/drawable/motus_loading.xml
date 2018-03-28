@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:drawable="@drawable/ic_platform_top_0" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_1" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_2" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_3" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_4" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_5" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_6" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_7" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_8" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_minus_1" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_minus_2" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_minus_3" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_minus_4" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_minus_5" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_minus_6" android:duration="50" />
+    <item android:drawable="@drawable/ic_platform_top_minus_7" android:duration="50" />
+</animation-list>
