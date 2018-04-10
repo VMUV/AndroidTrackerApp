@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import comms.protocol.java.DataPacket;
 import comms.protocol.java.Rotation_Vector_RawDataPacket;
 
 public class MainActivity extends AppCompatActivity
@@ -84,7 +85,9 @@ public class MainActivity extends AppCompatActivity
                     try
                     {
                         mDataPacket.Serialize(sensorRotationVectorArray);
-                        RotationalDataStorage.dataQueue.Add(mDataPacket);
+                        byte[] stream = new byte[mDataPacket.getExpectedLen() + DataPacket.NumOverHeadBytes];
+                        mDataPacket.SerializeToStream(stream, 0);
+                        RotationalDataStorage.SetData(stream);
                     }
                     catch(Exception e)
                     {

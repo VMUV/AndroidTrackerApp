@@ -31,7 +31,6 @@ public class BluetoothStateMachine extends Thread
     private BluetoothSocket mBluetoothSocket;
     private Message mStateChangeHandlerMessage;
     private Bundle mMessageBundle;
-    private byte[] outgoingMessage = new byte[1024];
     private final String SERVER_UUID;
     private final String SERVER_NAME;
 
@@ -182,8 +181,10 @@ public class BluetoothStateMachine extends Thread
         {
             try
             {
-                int numBytes = RotationalDataStorage.dataQueue.GetStreamable(outgoingMessage);
-                mOutputStream.write(outgoingMessage, 0, numBytes);
+                if (RotationalDataStorage.HasData()) {
+                    byte[] data = RotationalDataStorage.GetData();
+                    mOutputStream.write(data);
+                }
             }
             catch (IOException e)
             {
