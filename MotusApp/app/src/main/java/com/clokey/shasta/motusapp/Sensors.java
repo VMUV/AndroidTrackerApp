@@ -19,62 +19,73 @@ public class Sensors extends Activity implements SensorEventListener {
     private Sensor mLinearAcceleration;
     private Sensor mStepDetector;
     private final String mTag = "Sensors";
+    private boolean mListenersRegistered = false;
 
     public Sensors(SensorManager sensorManager) {
         mSensorManager = sensorManager;
-        assignSensors();
     }
 
-    private void assignSensors() {
-        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-        Log.v(mTag, sensorList.toString());
+    public void registerListeners() {
+        if (!mListenersRegistered) {
+            List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+            Log.v(mTag, sensorList.toString());
 
-        for (int i = 0; i < sensorList.size(); i++) {
-            Sensor element = sensorList.get(i);
-            int type = element.getType();
-            switch (type) {
-                case Sensor.TYPE_ACCELEROMETER:
-                    mAccelerometer = mSensorManager.getDefaultSensor(type);
-                    mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-                    Log.v(mTag, "Got Accelerometer!");
-                    break;
-                case Sensor.TYPE_GYROSCOPE:
-                    mGyro = mSensorManager.getDefaultSensor(type);
-                    mSensorManager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_NORMAL);
-                    Log.v(mTag, "Got Gyro!");
-                    break;
-                case Sensor.TYPE_ROTATION_VECTOR:
-                    mRotationVector = mSensorManager.getDefaultSensor(type);
-                    mSensorManager.registerListener(this, mRotationVector, SensorManager.SENSOR_DELAY_NORMAL);
-                    Log.v(mTag, "Got Rotation Vector!");
-                    break;
-                case Sensor.TYPE_POSE_6DOF:
-                    mPose6DOF = mSensorManager.getDefaultSensor(type);
-                    mSensorManager.registerListener(this, mPose6DOF, SensorManager.SENSOR_DELAY_NORMAL);
-                    Log.v(mTag, "Got Pose 6DOF!");
-                    break;
-                case Sensor.TYPE_LINEAR_ACCELERATION:
-                    mLinearAcceleration = mSensorManager.getDefaultSensor(type);
-                    mSensorManager.registerListener(this, mLinearAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
-                    Log.v(mTag, "Got Linear Acceleration!");
-                    break;
-                case Sensor.TYPE_STEP_DETECTOR:
-                    mStepDetector = mSensorManager.getDefaultSensor(type);
-                    mSensorManager.registerListener(this, mStepDetector, SensorManager.SENSOR_DELAY_NORMAL);
-                    Log.v(mTag, "Got Step Detector!");
-                    break;
+            for (int i = 0; i < sensorList.size(); i++) {
+                Sensor element = sensorList.get(i);
+                int type = element.getType();
+                switch (type) {
+                    case Sensor.TYPE_ACCELEROMETER:
+                        mAccelerometer = mSensorManager.getDefaultSensor(type);
+                        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+                        Log.v(mTag, "Got Accelerometer!");
+                        break;
+                    case Sensor.TYPE_GYROSCOPE:
+                        mGyro = mSensorManager.getDefaultSensor(type);
+                        mSensorManager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_FASTEST);
+                        Log.v(mTag, "Got Gyro!");
+                        break;
+                    case Sensor.TYPE_ROTATION_VECTOR:
+                        mRotationVector = mSensorManager.getDefaultSensor(type);
+                        mSensorManager.registerListener(this, mRotationVector, SensorManager.SENSOR_DELAY_FASTEST);
+                        Log.v(mTag, "Got Rotation Vector!");
+                        break;
+                    case Sensor.TYPE_POSE_6DOF:
+                        mPose6DOF = mSensorManager.getDefaultSensor(type);
+                        mSensorManager.registerListener(this, mPose6DOF, SensorManager.SENSOR_DELAY_FASTEST);
+                        Log.v(mTag, "Got Pose 6DOF!");
+                        break;
+                    case Sensor.TYPE_LINEAR_ACCELERATION:
+                        mLinearAcceleration = mSensorManager.getDefaultSensor(type);
+                        mSensorManager.registerListener(this, mLinearAcceleration, SensorManager.SENSOR_DELAY_FASTEST);
+                        Log.v(mTag, "Got Linear Acceleration!");
+                        break;
+                    case Sensor.TYPE_STEP_DETECTOR:
+                        mStepDetector = mSensorManager.getDefaultSensor(type);
+                        mSensorManager.registerListener(this, mStepDetector, SensorManager.SENSOR_DELAY_FASTEST);
+                        Log.v(mTag, "Got Step Detector!");
+                        break;
+                }
             }
+
+            mListenersRegistered = true;
+        }
+    }
+
+    public void unRegisterListeners() {
+        if (mListenersRegistered) {
+            mSensorManager.unregisterListener(this);
+            mListenersRegistered = false;
         }
     }
 
     protected void onResume() {
         super.onResume();
-        //mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        registerListeners();
     }
 
     protected void onPause() {
         super.onPause();
-        //mSensorManager.unregisterListener(this);
+        unRegisterListeners();
     }
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {

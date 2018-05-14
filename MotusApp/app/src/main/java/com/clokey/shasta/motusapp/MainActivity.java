@@ -49,37 +49,12 @@ public class MainActivity extends AppCompatActivity {
         mTrackerMessage.setText(R.string.please_enable_bluetooth);
         mMotusImageView = findViewById(R.id.motus_platform);
         mMotusImageView.setVisibility(View.INVISIBLE);
+
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensors = new Sensors(mSensorManager);
+
         initializeBluetooth();
     }
-
-/*    private class RotationEventListener implements SensorEventListener {
-        @Override
-        public void onAccuracyChanged(Sensor arg0, int arg1) {
-        }
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-*//*            switch (event.sensor.getType()) {
-                case CHOSEN_SENSOR: {
-                    sensorRotationVectorArray = event.values;
-                    mDataPacket = new Rotation_Vector_RawDataPacket();
-                    try {
-                        mDataPacket.Serialize(sensorRotationVectorArray);
-                        byte[] stream = new byte[mDataPacket.getExpectedLen() + DataPacket.NumOverHeadBytes];
-                        mDataPacket.SerializeToStream(stream, 0);
-                        RotationalDataStorage.SetData(stream);
-                    } catch (Exception e) {
-                        Log.v("onSensorChanged", "dataQueue.Add failed " + e.toString());
-                    }
-                }
-                break;
-                default:
-                    break;
-            }*//*
-        }
-    }*/
 
     private class ToggleBTSMStateEventListener implements View.OnClickListener {
         @Override
@@ -134,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
                     mMotusAnimation = (AnimationDrawable) mMotusImageView.getBackground();
                     mMotusAnimation.start();
                     mMotusImageView.setVisibility(View.VISIBLE);
+
+                    mSensors.registerListeners();
                 }
                 break;
                 case 2: {
@@ -143,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
                         mMotusAnimation.stop();
                     mMotusImageView.setBackgroundResource(R.drawable.ic_platform_top_0);
                     mMotusImageView.setVisibility(View.VISIBLE);
+
+                    mSensors.unRegisterListeners();
                 }
                 break;
                 case 101: {
@@ -154,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
                     if (mMotusAnimation != null)
                         mMotusAnimation.stop();
                     mMotusImageView.setVisibility(View.INVISIBLE);
+
+                    mSensors.unRegisterListeners();
                 }
                 break;
                 default: {
@@ -178,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.v("onActivityResult", "startBTConnection called");
                     //BluetoothUtils.startBTConnection();
                     BluetoothUtils.runBTSM();
-                    //mSensorManager.registerListener(mSensorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_GAME);
                     mMotusImageView.setOnClickListener(new ToggleBTSMStateEventListener());
                 }
             }
@@ -186,20 +166,6 @@ public class MainActivity extends AppCompatActivity {
             default:
                 break;
         }
-    }
-
-    private void initializeSensorManager() {
-/*        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        isSensorManagerInitialized = true;
-        if (mSensorManager == null)
-            isRotationVectorSensorAvailable = false;
-        else if (mSensorManager.getDefaultSensor(CHOSEN_SENSOR) == null)
-            isRotationVectorSensorAvailable = false;
-        else
-            mRotationVectorSensor = mSensorManager.getDefaultSensor(CHOSEN_SENSOR);
-
-        mSensorListener = new RotationEventListener();
-        Log.v("initializeSensorManager", Boolean.toString(isRotationVectorSensorAvailable));*/
     }
 
     private void initializeBluetooth() {
