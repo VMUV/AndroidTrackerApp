@@ -7,11 +7,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import comms.protocol.java.Accelerometer_RawDataPacket;
 import comms.protocol.java.DataQueue;
 import comms.protocol.java.AndroidSensor;
+import comms.protocol.java.Gyro_RawDataPacket;
+import comms.protocol.java.LinearAcceleration_RawDataPacket;
 import comms.protocol.java.Rotation_Vector_RawDataPacket;
 
 public class Sensors extends Activity implements SensorEventListener {
@@ -110,6 +113,11 @@ public class Sensors extends Activity implements SensorEventListener {
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 Log.v(mTag, "Got Gyro Event");
+                try {
+                    dataQueue.Add(new Gyro_RawDataPacket(androidSensor.GetBytes()));
+                } catch (Exception e) {
+                    Log.v(mTag, e.getMessage());
+                }
                 break;
             case Sensor.TYPE_ROTATION_VECTOR:
                 Log.v(mTag, "Got Rotation Vector Event");
@@ -121,13 +129,28 @@ public class Sensors extends Activity implements SensorEventListener {
                 break;
             case Sensor.TYPE_POSE_6DOF:
                 Log.v(mTag, "Got Pose 6DOF Event");
+                // TODO:
                 break;
             case Sensor.TYPE_LINEAR_ACCELERATION:
                 Log.v(mTag, "Got Linear Acceleration Event");
+                try {
+                    dataQueue.Add(new LinearAcceleration_RawDataPacket(androidSensor.GetBytes()));
+                } catch (Exception e) {
+                    Log.v(mTag, e.getMessage());
+                }
                 break;
             case Sensor.TYPE_STEP_DETECTOR:
                 Log.v(mTag, "Got Step Detector Event");
+                // TODO:
                 break;
+        }
+
+        if (dataQueue.getSize() > 0) {
+            byte[] tmp = new byte[2048];
+            int numBytes = dataQueue.GetStreamable(tmp);
+            ByteBuffer buffer = ByteBuffer.allocate(numBytes);
+            buffer.put(tmp, 0, numBytes);
+            SynchronizedDataQueue.SetData(buffer.array());
         }
     }
 }
