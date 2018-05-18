@@ -15,7 +15,9 @@ import comms.protocol.java.DataQueue;
 import comms.protocol.java.AndroidSensor;
 import comms.protocol.java.Gyro_RawDataPacket;
 import comms.protocol.java.LinearAcceleration_RawDataPacket;
+import comms.protocol.java.Pose_6DOF_RawDataPacket;
 import comms.protocol.java.Rotation_Vector_RawDataPacket;
+import comms.protocol.java.Step_RawDataPacket;
 
 public class Sensors extends Activity implements SensorEventListener {
     private SensorManager mSensorManager;
@@ -28,6 +30,7 @@ public class Sensors extends Activity implements SensorEventListener {
     private final String mTag = "Sensors";
     private boolean mListenersRegistered = false;
     private DataQueue dataQueue = new DataQueue(128);
+    private float stepCounts = 0;
 
     public Sensors(SensorManager sensorManager) {
         mSensorManager = sensorManager;
@@ -129,7 +132,11 @@ public class Sensors extends Activity implements SensorEventListener {
                 break;
             case Sensor.TYPE_POSE_6DOF:
                 Log.v(mTag, "Got Pose 6DOF Event");
-                // TODO:
+                try {
+                    dataQueue.Add(new Pose_6DOF_RawDataPacket(androidSensor.GetBytes()));
+                } catch (Exception e) {
+                    Log.v(mTag, e.getMessage());
+                }
                 break;
             case Sensor.TYPE_LINEAR_ACCELERATION:
                 Log.v(mTag, "Got Linear Acceleration Event");
@@ -141,7 +148,12 @@ public class Sensors extends Activity implements SensorEventListener {
                 break;
             case Sensor.TYPE_STEP_DETECTOR:
                 Log.v(mTag, "Got Step Detector Event");
-                // TODO:
+                AndroidSensor stepSensor = new AndroidSensor(new float[] {stepCounts++}, androidSensor.GetTimeStamp());
+                try {
+                    dataQueue.Add(new Step_RawDataPacket(stepSensor.GetBytes()));
+                } catch (Exception e) {
+                    Log.v(mTag, e.getMessage());
+                }
                 break;
         }
 
@@ -149,6 +161,7 @@ public class Sensors extends Activity implements SensorEventListener {
             byte[] tmp = new byte[2048];
             int numBytes = dataQueue.GetStreamable(tmp);
             ByteBuffer buffer = ByteBuffer.allocate(numBytes);
+            Log.v(mTag, "Queueing " + numBytes + " bytes");
             buffer.put(tmp, 0, numBytes);
             SynchronizedDataQueue.SetData(buffer.array());
         }

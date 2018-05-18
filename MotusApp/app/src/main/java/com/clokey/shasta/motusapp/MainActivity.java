@@ -1,13 +1,9 @@
 package com.clokey.shasta.motusapp;
 
 import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.drawable.AnimationDrawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,14 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import comms.protocol.java.DataPacket;
-import comms.protocol.java.Rotation_Vector_RawDataPacket;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -157,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(turnOnBTDiscover, REQUEST_MAKE_DISCOVERABLE);
                 } else {
                     Log.v("onActivityResult", "startBTConnection called");
-                    //BluetoothUtils.startBTConnection();
                     BluetoothUtils.runBTSM();
                     mMotusImageView.setOnClickListener(new ToggleBTSMStateEventListener());
                 }

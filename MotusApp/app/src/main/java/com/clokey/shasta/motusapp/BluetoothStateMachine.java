@@ -19,8 +19,7 @@ import static android.content.ContentValues.TAG;
  * Created by Shasta on 3/23/2018.
  */
 
-public class BluetoothStateMachine extends Thread
-{
+public class BluetoothStateMachine extends Thread {
     private boolean isStreaming;
     private boolean overrideToStandby;
     private Timer mTimer;
@@ -35,8 +34,7 @@ public class BluetoothStateMachine extends Thread
     private final String SERVER_NAME;
 
 
-    public BluetoothStateMachine(String serverName, String serverUuid)
-    {
+    public BluetoothStateMachine(String serverName, String serverUuid) {
         isStreaming = false;
         overrideToStandby = false;
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -46,29 +44,22 @@ public class BluetoothStateMachine extends Thread
     }
 
     @Override
-    public void run()
-    {
-        while(!interrupted())
-        {
-            switch (currentState.getStateValue())
-            {
-                case 0:
-                {
+    public void run() {
+        while (!interrupted()) {
+            switch (currentState.getStateValue()) {
+                case 0: {
                     waitForConnection();
                 }
                 break;
-                case 1:
-                {
+                case 1: {
                     streamRotationalData();
                 }
                 break;
-                case 2:
-                {
+                case 2: {
                     stayConnectedAndStandby();
                 }
                 break;
-                default:
-                {
+                default: {
                     changeState(BluetoothStates.waitForClient);
                 }
                 break;
@@ -76,19 +67,15 @@ public class BluetoothStateMachine extends Thread
         }
     }
 
-    private void waitForConnection()
-    {
+    private void waitForConnection() {
         mStateChangeHandlerMessage = new Message();
         mStateChangeHandlerMessage.arg1 = getCurrentState().getStateValue();
         MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
-        try
-        {
+        try {
             // SERVER_UUID is the app's UUID string, also used by the client code.
             mBluetoothServerSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(SERVER_NAME, UUID.fromString(SERVER_UUID));
             Log.v("BTSM.waitForConnection", "Server Socker:" + mBluetoothServerSocket.toString());
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             Log.e(TAG, "Socket's listen() method failed", e);
             mStateChangeHandlerMessage = new Message();
             mStateChangeHandlerMessage.arg1 = 101;
@@ -96,22 +83,17 @@ public class BluetoothStateMachine extends Thread
             cancel();
         }
 
-        try
-        {
+        try {
             Log.v("BTSM.waitForConnection", "looking for clients");
             mBluetoothSocket = mBluetoothServerSocket.accept();
-            if (mBluetoothServerSocket != null)
-            {
+            if (mBluetoothServerSocket != null) {
                 Log.v("BTSM.waitForConnection", "client found, moving to stream data state");
-                if (overrideToStandby)
-                {
+                if (overrideToStandby) {
                     currentState = BluetoothStates.connectedStandby;
                     mStateChangeHandlerMessage = new Message();
                     mStateChangeHandlerMessage.arg1 = BluetoothStates.connectedStandby.getStateValue();
                     MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
-                }
-                else
-                {
+                } else {
                     currentState = BluetoothStates.streamData;
                     mStateChangeHandlerMessage = new Message();
                     mStateChangeHandlerMessage.arg1 = BluetoothStates.streamData.getStateValue();
@@ -119,9 +101,7 @@ public class BluetoothStateMachine extends Thread
                 }
                 mBluetoothServerSocket.close();
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.e(TAG, "Socket's accept() method failed", e);
             mStateChangeHandlerMessage = new Message();
             mStateChangeHandlerMessage.arg1 = 101;
@@ -131,19 +111,14 @@ public class BluetoothStateMachine extends Thread
         }
     }
 
-    private void streamRotationalData()
-    {
-        if (!isStreaming)
-        {
+    private void streamRotationalData() {
+        if (!isStreaming) {
             overrideToStandby = false;
             isStreaming = true;
-            try
-            {
+            try {
                 mOutputStream = mBluetoothSocket.getOutputStream();
                 Log.v("BTSM.streamRotData", "successfully got output stream");
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 Log.e(TAG, "Error occurred when creating output stream", e);
                 mStateChangeHandlerMessage = new Message();
                 mStateChangeHandlerMessage.arg1 = 101;
@@ -151,43 +126,33 @@ public class BluetoothStateMachine extends Thread
                 cancel();
             }
 
-            try
-            {
+            try {
                 mTimer = new Timer(true);
-                mTimer.scheduleAtFixedRate(new SendMessage(),0,25);
+                mTimer.scheduleAtFixedRate(new SendMessage(), 0, 90);
                 Log.v("BTSM.streamRotData", "Started Data Stream. isStreaming");
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 /* Allow thread to exit */
                 Log.v("BTSM.streamRotData", "Failed to schedule data stream: " + e.toString());
                 currentState = BluetoothStates.connectedStandby;
                 mStateChangeHandlerMessage = new Message();
                 mStateChangeHandlerMessage.arg1 = BluetoothStates.connectedStandby.getStateValue();
                 MainActivity.mBluetoothMessageHandler.sendMessage(mStateChangeHandlerMessage);
-
             }
         }
     }
 
-    private void stayConnectedAndStandby()
-    {
+    private void stayConnectedAndStandby() {
         overrideToStandby = false;
     }
 
-    class SendMessage extends TimerTask
-    {
-        public void run()
-        {
-            try
-            {
+    class SendMessage extends TimerTask {
+        public void run() {
+            try {
                 if (SynchronizedDataQueue.HasData()) {
                     byte[] data = SynchronizedDataQueue.GetData();
                     mOutputStream.write(data);
                 }
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 Log.e(TAG, "Error occurred when sending data", e);
                 mStateChangeHandlerMessage = new Message();
                 mStateChangeHandlerMessage.arg1 = 101;
@@ -198,77 +163,72 @@ public class BluetoothStateMachine extends Thread
         }
     }
 
-    public void changeState(BluetoothStates nextState)
-    {
-        switch (currentState.getStateValue())
-        {
-            case 1:
-            {
-                if (nextState.getStateValue() == 2)
-                {
+    public void changeState(BluetoothStates nextState) {
+        switch (currentState.getStateValue()) {
+            case 1: {
+                if (nextState.getStateValue() == 2) {
                     mTimer.cancel();
                     currentState = nextState;
                     isStreaming = false;
-                }
-                else if (nextState.getStateValue() == 0)
-                {
+                } else if (nextState.getStateValue() == 0) {
                     mTimer.cancel();
-                    try {mBluetoothSocket.close();}
-                    catch (IOException e) { }
+                    try {
+                        mBluetoothSocket.close();
+                    } catch (IOException e) {
+                    }
                     currentState = nextState;
                     isStreaming = false;
                 }
             }
             break;
-            case 2:
-            {
+            case 2: {
                 currentState = nextState;
             }
             break;
             default:
-            break;
+                break;
         }
     }
 
-    public BluetoothStates getCurrentState()
-    {
+    public BluetoothStates getCurrentState() {
         return currentState;
     }
 
-    /**Should only be called when attempting to make `waitForConnection` state fall into `connectedStandby`*/
-    public void setOverrideToStandby(boolean standbyOrStream)
-    {
+    /**
+     * Should only be called when attempting to make `waitForConnection` state fall into `connectedStandby`
+     */
+    public void setOverrideToStandby(boolean standbyOrStream) {
         overrideToStandby = standbyOrStream;
     }
 
-    public void cancel()
-    {
-        switch (currentState.getStateValue())
-        {
-            case 0:
-            {
-                try {mBluetoothServerSocket.close();}
-                catch (Exception e) {}
-                try {mBluetoothSocket.close();}
-                catch (Exception e) {}
+    public void cancel() {
+        switch (currentState.getStateValue()) {
+            case 0: {
+                try {
+                    mBluetoothServerSocket.close();
+                } catch (Exception e) {
+                }
+                try {
+                    mBluetoothSocket.close();
+                } catch (Exception e) {
+                }
                 interrupt();
             }
             break;
-            case 1:
-            {
+            case 1: {
                 mTimer.cancel();
-                try {mBluetoothSocket.close();}
-                catch (Exception e) {}
+                try {
+                    mBluetoothSocket.close();
+                } catch (Exception e) {
+                }
                 interrupt();
             }
             break;
-            case 2:
-            {
+            case 2: {
                 interrupt();
             }
             break;
-            default:
-            {
+            default: {
                 interrupt();
             }
             break;
