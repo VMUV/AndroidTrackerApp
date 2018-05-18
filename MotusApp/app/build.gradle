@@ -33,5 +33,5 @@ dependencies {
     testCompile 'org.powermock:powermock-api-mockito:1.7.3'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    implementation files('libs/Comms Protocol Java Release 1.0.1.jar')
+    implementation files('libs/CommsProtocolJava.jar')
 }

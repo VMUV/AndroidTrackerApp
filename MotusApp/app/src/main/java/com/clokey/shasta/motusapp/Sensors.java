@@ -1,7 +1,6 @@
 package com.clokey.shasta.motusapp;
 
 import android.app.Activity;
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -9,6 +8,11 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 import java.util.List;
+
+import comms.protocol.java.Accelerometer_RawDataPacket;
+import comms.protocol.java.DataQueue;
+import comms.protocol.java.AndroidSensor;
+import comms.protocol.java.Rotation_Vector_RawDataPacket;
 
 public class Sensors extends Activity implements SensorEventListener {
     private SensorManager mSensorManager;
@@ -20,6 +24,7 @@ public class Sensors extends Activity implements SensorEventListener {
     private Sensor mStepDetector;
     private final String mTag = "Sensors";
     private boolean mListenersRegistered = false;
+    private DataQueue dataQueue = new DataQueue(128);
 
     public Sensors(SensorManager sensorManager) {
         mSensorManager = sensorManager;
@@ -93,15 +98,26 @@ public class Sensors extends Activity implements SensorEventListener {
 
     public void onSensorChanged(SensorEvent event) {
         Sensor sensor = event.sensor;
+        AndroidSensor androidSensor = new AndroidSensor(event.values, event.timestamp);
         switch (sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
                 Log.v(mTag, "Got Accelerometer Event");
+                try {
+                    dataQueue.Add(new Accelerometer_RawDataPacket(androidSensor.GetBytes()));
+                } catch (Exception e) {
+                    Log.v(mTag, e.getMessage());
+                }
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 Log.v(mTag, "Got Gyro Event");
                 break;
             case Sensor.TYPE_ROTATION_VECTOR:
                 Log.v(mTag, "Got Rotation Vector Event");
+                try {
+                    dataQueue.Add(new Rotation_Vector_RawDataPacket(androidSensor.GetBytes()));
+                } catch (Exception e) {
+                    Log.v(mTag, e.getMessage());
+                }
                 break;
             case Sensor.TYPE_POSE_6DOF:
                 Log.v(mTag, "Got Pose 6DOF Event");

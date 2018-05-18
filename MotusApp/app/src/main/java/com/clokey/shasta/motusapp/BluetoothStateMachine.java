@@ -181,8 +181,8 @@ public class BluetoothStateMachine extends Thread
         {
             try
             {
-                if (RotationalDataStorage.HasData()) {
-                    byte[] data = RotationalDataStorage.GetData();
+                if (SynchronizedDataQueue.HasData()) {
+                    byte[] data = SynchronizedDataQueue.GetData();
                     mOutputStream.write(data);
                 }
             }
