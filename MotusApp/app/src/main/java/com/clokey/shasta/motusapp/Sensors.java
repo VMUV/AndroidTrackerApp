@@ -17,7 +17,7 @@ import comms.protocol.java.Gyro_RawDataPacket;
 import comms.protocol.java.LinearAcceleration_RawDataPacket;
 import comms.protocol.java.Pose_6DOF_RawDataPacket;
 import comms.protocol.java.Rotation_Vector_RawDataPacket;
-import comms.protocol.java.Step_RawDataPacket;
+import comms.protocol.java.StepDetector_RawDataSensor;
 
 public class Sensors extends Activity implements SensorEventListener {
     private SensorManager mSensorManager;
@@ -150,7 +150,7 @@ public class Sensors extends Activity implements SensorEventListener {
                 Log.v(mTag, "Got Step Detector Event");
                 AndroidSensor stepSensor = new AndroidSensor(new float[] {stepCounts++}, androidSensor.GetTimeStamp());
                 try {
-                    dataQueue.Add(new Step_RawDataPacket(stepSensor.GetBytes()));
+                    dataQueue.Add(new StepDetector_RawDataSensor(stepSensor.GetBytes()));
                 } catch (Exception e) {
                     Log.v(mTag, e.getMessage());
                 }
