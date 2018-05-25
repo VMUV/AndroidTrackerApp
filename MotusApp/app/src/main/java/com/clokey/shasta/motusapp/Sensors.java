@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.List;
 
 import comms.protocol.java.Accelerometer_RawDataPacket;
@@ -29,7 +30,7 @@ public class Sensors extends Activity implements SensorEventListener {
     private Sensor mStepDetector;
     private final String mTag = "Sensors";
     private boolean mListenersRegistered = false;
-    private DataQueue dataQueue = new DataQueue(128);
+    private DataQueue dataQueue = new DataQueue(2048);
     private float stepCounts = 0;
 
     public Sensors(SensorManager sensorManager) {
@@ -124,8 +125,14 @@ public class Sensors extends Activity implements SensorEventListener {
                 break;
             case Sensor.TYPE_ROTATION_VECTOR:
                 Log.v(mTag, "Got Rotation Vector Event");
+                //  This could be 5 values instead of 4 so we nee to manually handle this case
+                float[] tmpVals = new float[4];
+                float[] tmpSensorVals = androidSensor.GetValues();
+                for (int i = 0; i < tmpVals.length; i++)
+                    tmpVals[i] = tmpSensorVals[i];
+                AndroidSensor tmpSensor = new AndroidSensor(tmpVals, androidSensor.GetTimeStamp());
                 try {
-                    dataQueue.Add(new Rotation_Vector_RawDataPacket(androidSensor.GetBytes()));
+                    dataQueue.Add(new Rotation_Vector_RawDataPacket(tmpSensor.GetBytes()));
                 } catch (Exception e) {
                     Log.v(mTag, e.getMessage());
                 }
@@ -157,8 +164,13 @@ public class Sensors extends Activity implements SensorEventListener {
                 break;
         }
 
+        Log.v(mTag, Long.toString(androidSensor.GetTimeStamp()));
+        float[] debug = androidSensor.GetValues();
+        for (int i = 0; i < debug.length; i++)
+            Log.v(mTag, Float.toString(debug[i]));
+
         if (dataQueue.getSize() > 0) {
-            byte[] tmp = new byte[2048];
+            byte[] tmp = new byte[16535];
             int numBytes = dataQueue.GetStreamable(tmp);
             ByteBuffer buffer = ByteBuffer.allocate(numBytes);
             Log.v(mTag, "Queueing " + numBytes + " bytes");

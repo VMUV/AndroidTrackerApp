@@ -3,7 +3,7 @@ package com.clokey.shasta.motusapp;
 import comms.protocol.java.DataQueue;
 
 public class SynchronizedDataQueue {
-    private static DataQueue dataQueue = new DataQueue(256);
+    private static DataQueue dataQueue = new DataQueue(2048);
 
     public static synchronized boolean HasData() {
         return !dataQueue.IsEmpty();
@@ -14,7 +14,7 @@ public class SynchronizedDataQueue {
     }
 
     public static synchronized byte[] GetData() {
-        byte[] tmp = new byte[4096];
+        byte[] tmp = new byte[16535];
         int numBytes = dataQueue.GetStreamable(tmp);
         byte[] rtn = new byte[numBytes];
         System.arraycopy(tmp, 0, rtn, 0, numBytes);
